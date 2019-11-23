@@ -17,15 +17,19 @@ Testing Combine publishers with [XCTestExpectation](*https://developer.apple.com
 CombineExpectations aims at streamlining those tests. It defines an XCTestCase method which waits for *publisher expectations*.
 
 - [Usage]
+- [Installation]
 - [Publisher Expectations]: [completion], [elements], [finished], [first], [last], [prefix], [recording], [single]
 
 ---
 
 ## Usage
 
-Waiting for *publisher expectations* allows your tests to look like this:
+Waiting for [Publisher Expectations] allows your tests to look like this:
 
 ```swift
+import XCTest
+import CombineExpectations
+
 class PublisherTests: XCTestCase {
     func testElements() throws {
         // 1. Create a publisher
@@ -67,6 +71,27 @@ class PublisherTests: XCTestCase {
         try wait(for: recorder.finished, timeout: ...)
     }
 }
+```
+
+
+## Installation
+
+Add a dependency for CombineExpectations to your [Swift Package](https://swift.org/package-manager/) test targets:
+
+```diff
+ import PackageDescription
+ 
+ let package = Package(
+     dependencies: [
++        .package(url: "https://github.com/groue/CombineExpectations.git", ...)
+     ],
+     targets: [
+         .testTarget(
+             dependencies: [
++                "CombineExpectations"
+             ])
+     ]
+ )
 ```
 
 
@@ -567,6 +592,7 @@ func testPassthroughSubjectDoesNotFinish() throws {
 
 [Release Notes]: CHANGELOG.md
 [Usage]: #usage
+[Installation]: #installation
 [Publisher Expectations]: #publisher-expectations
 [finished]: #finished
 [prefix]: #prefix
