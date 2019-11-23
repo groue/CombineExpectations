@@ -72,16 +72,16 @@ class PublisherTests: XCTestCase {
 
 ## Publisher Expectations
 
-There are various publisher expectations. Each one tests a specific publisher behavior:
+There are various publisher expectations. Each one waits for a specific publisher aspect:
 
-- [completion]
-- [elements]
-- [finished]
-- [first]
-- [last]
-- [prefix]
-- [recording]
-- [single]
+- [completion]: the publisher completion
+- [elements]: all published elements
+- [finished]: the publisher successful completion
+- [first]: the first published element
+- [last]: the last published element
+- [prefix]: the first N published elements
+- [recording]: the full recording of publisher events
+- [single]: the one and only published element
 - [Inverted Expectations]
 
 ### completion
