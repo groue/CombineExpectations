@@ -8,7 +8,7 @@ public enum PublisherExpectations { }
 /// You can build publisher expectations from Recorder returned by the
 /// `Publisher.record()` method. For example:
 ///
-///     // This test pass (no timeout, no error)
+///     // SUCCESS: no timeout, no error
 ///     func testArrayPublisherPublishesArrayElements() throws {
 ///         let publisher = ["foo", "bar", "baz"].publisher
 ///         let recorder = publisher.record()
@@ -34,7 +34,7 @@ extension XCTestCase {
     ///
     /// For example:
     ///
-    ///     // This test pass (no timeout, no error)
+    ///     // SUCCESS: no timeout, no error
     ///     func testArrayPublisherPublishesArrayElements() throws {
     ///         let publisher = ["foo", "bar", "baz"].publisher
     ///         let recorder = publisher.record()
