@@ -23,7 +23,7 @@ CombineExpectations aims at streamlining those tests. It defines an XCTestCase m
 
 ## Usage
 
-Waiting for *publisher expectations* allow your tests to look like this:
+Waiting for *publisher expectations* allows your tests to look like this:
 
 ```swift
 class PublisherTests: XCTestCase {
