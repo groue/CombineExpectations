@@ -7,15 +7,14 @@ import CombineExpectations
 /// receive subscribers.
 class LateSubscriptionTest: FailureTestCase {
     func testNoSubscriptionPublisher() throws {
-        struct NoSubscriptionPublisher<Base: Publisher>: Publisher {
-            typealias Output = Base.Output
-            typealias Failure = Base.Failure
-            let base: Base
+        struct NoSubscriptionPublisher: Publisher {
+            typealias Output = String
+            typealias Failure = Never
             func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input { }
         }
 
         do {
-            let publisher = NoSubscriptionPublisher(base: Just("foo"))
+            let publisher = NoSubscriptionPublisher()
             let recorder = publisher.record()
             
             let (elements, completion) = recorder.elementsAndCompletion
@@ -23,13 +22,15 @@ class LateSubscriptionTest: FailureTestCase {
             XCTAssertNil(completion)
         }
         do {
-            let publisher = NoSubscriptionPublisher(base: Just("foo"))
+            // a test with an expectation that is fulfilled on completion
+            let publisher = NoSubscriptionPublisher()
             let recorder = publisher.record()
             
             try wait(for: recorder.finished.inverted, timeout: 0.1)
         }
         do {
-            let publisher = NoSubscriptionPublisher(base: Just("foo"))
+            // a test with an expectation that is fulfilled on input
+            let publisher = NoSubscriptionPublisher()
             let recorder = publisher.record()
             
             _ = try wait(for: recorder.first.inverted, timeout: 0.1)
@@ -57,12 +58,14 @@ class LateSubscriptionTest: FailureTestCase {
             XCTAssertNil(completion)
         }
         do {
+            // a test with an expectation that is fulfilled on completion
             let publisher = AsynchronousSubscriptionPublisher(base: Just("foo"))
             let recorder = publisher.record()
             
             try wait(for: recorder.finished, timeout: 0.1)
         }
         do {
+            // a test with an expectation that is fulfilled on input
             let publisher = AsynchronousSubscriptionPublisher(base: Just("foo"))
             let recorder = publisher.record()
             
