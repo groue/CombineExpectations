@@ -48,32 +48,3 @@ extension PublisherExpectations {
         }
     }
 }
-
-extension Recorder {
-    /// Returns a publisher expectation which waits for the recorded publisher
-    /// to complete successfully.
-    ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// fails with an error.
-    ///
-    /// For example:
-    ///
-    ///     // SUCCESS: no timeout, no error
-    ///     func testArrayPublisherFinishesWithoutError() throws {
-    ///         let publisher = ["foo", "bar", "baz"].publisher
-    ///         let recorder = publisher.record()
-    ///         try wait(for: recorder.finished, timeout: 1)
-    ///     }
-    ///
-    /// This publisher expectation can be inverted:
-    ///
-    ///     // SUCCESS: no timeout, no error
-    ///     func testPassthroughSubjectDoesNotFinish() throws {
-    ///         let publisher = PassthroughSubject<String, Never>()
-    ///         let recorder = publisher.record()
-    ///         try wait(for: recorder.finished.inverted, timeout: 1)
-    ///     }
-    public var finished: PublisherExpectations.Finished<Input, Failure> {
-        PublisherExpectations.Finished(recorder: self)
-    }
-}
