@@ -16,23 +16,41 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public typealias Input = Input
     public typealias Failure = Failure
     
-    /// The elements and completion recorded so far.
-    public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
-        synchronized { (elements: _elements, completion: _completion) }
+    private struct Expectations {
+        var onInput: [(XCTestExpectation, remainingCount: Int)] = []
+        var onCompletion: [XCTestExpectation] = []
     }
     
-    private var _elements: [Input] = []
-    private var _completion: Subscribers.Completion<Failure>?
-    private var completionExpectations: [XCTestExpectation] = []
-    private var inputExpectations: [(XCTestExpectation, count: Int)] = []
+    private enum State {
+        case waitingForSubscription(Expectations)
+        case subscribed(Expectations, [Input], Subscription)
+        case completed([Input], Subscribers.Completion<Failure>)
+    }
+    
     private let lock = NSLock()
-    private var subscription: Subscription?
+    private var state: State = .waitingForSubscription(Expectations())
+    
+    /// The elements and completion recorded so far.
+    public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
+        synchronized {
+            switch state {
+            case .waitingForSubscription:
+                return (elements: [], completion: nil)
+            case let .subscribed(_, elements, _):
+                return (elements: elements, completion: nil)
+            case let .completed(elements, completion):
+                return (elements: elements, completion: completion)
+            }
+        }
+    }
     
     /// Use Publisher.record()
     fileprivate init() { }
     
     deinit {
-        self.subscription?.cancel()
+        if case let .subscribed(_, _, subscription) = state {
+            subscription.cancel()
+        }
     }
     
     private func synchronized<T>(_ execute: () throws -> T) rethrows -> T {
@@ -44,31 +62,45 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     // MARK: - Fulfillment
     
     func fulfillOnInput(_ expectation: XCTestExpectation) {
-        let initialCount: Int = synchronized {
-            let initialCount = min(expectation.expectedFulfillmentCount, _elements.count)
-            let remainingCount = expectation.expectedFulfillmentCount - initialCount
-            if remainingCount > 0 {
-                if _completion == nil {
-                    inputExpectations.append((expectation, count: remainingCount))
-                    return initialCount
-                } else {
-                    return expectation.expectedFulfillmentCount
+        synchronized {
+            switch state {
+            case let .waitingForSubscription(expectations):
+                var expectations = expectations
+                expectations.onInput.append((expectation, remainingCount: expectation.expectedFulfillmentCount))
+                state = .waitingForSubscription(expectations)
+                
+            case let .subscribed(expectations, elements, subscription):
+                let fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
+                expectation.fulfill(count: fulfillmentCount)
+                
+                var expectations = expectations
+                let remainingCount = expectation.expectedFulfillmentCount - fulfillmentCount
+                if remainingCount > 0 {
+                    expectations.onInput.append((expectation, remainingCount: remainingCount))
                 }
-            } else {
-                return initialCount
+                state = .subscribed(expectations, elements, subscription)
+                
+            case .completed:
+                expectation.fulfill(count: expectation.expectedFulfillmentCount)
             }
-        }
-        for _ in 0..<initialCount {
-            expectation.fulfill()
         }
     }
     
     func fulfillOnCompletion(_ expectation: XCTestExpectation) {
         synchronized {
-            if _completion != nil {
+            switch state {
+            case let .waitingForSubscription(expectations):
+                var expectations = expectations
+                expectations.onCompletion.append(expectation)
+                state = .waitingForSubscription(expectations)
+                
+            case let .subscribed(expectations, elements, subscription):
+                var expectations = expectations
+                expectations.onCompletion.append(expectation)
+                state = .subscribed(expectations, elements, subscription)
+                
+            case .completed:
                 expectation.fulfill()
-            } else {
-                completionExpectations.append(expectation)
             }
         }
     }
@@ -77,47 +109,57 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     
     public func receive(subscription: Subscription) {
         synchronized {
-            self.subscription = subscription
+            switch state {
+            case let .waitingForSubscription(expectations):
+                state = .subscribed(expectations, [], subscription)
+            default:
+                XCTFail("Unexpected subscription")
+            }
         }
         subscription.request(.unlimited)
     }
     
     public func receive(_ input: Input) -> Subscribers.Demand {
-        let fulfilledExpectations: [XCTestExpectation] = synchronized {
-            guard subscription != nil else { return [] }
-            var fulfilledExpectations: [XCTestExpectation] = []
-            var nextInputExpectations: [(XCTestExpectation, count: Int)] = []
-            for (expectation, count) in inputExpectations {
-                assert(count > 0)
-                fulfilledExpectations.append(expectation)
-                if count > 1 {
-                    nextInputExpectations.append((expectation, count: count - 1))
+        return synchronized {
+            switch state {
+            case let .subscribed(expectations, elements, subscription):
+                var inputExpectations: [(XCTestExpectation, remainingCount: Int)] = []
+                for (expectation, remainingCount) in expectations.onInput {
+                    assert(remainingCount > 0)
+                    expectation.fulfill()
+                    if remainingCount > 1 {
+                        inputExpectations.append((expectation, remainingCount: remainingCount - 1))
+                    }
                 }
+                
+                var elements = elements
+                var expectations = expectations
+                elements.append(input)
+                expectations.onInput = inputExpectations
+                state = .subscribed(expectations, elements, subscription)
+                return .unlimited
+                
+            default:
+                XCTFail("Unexpected publisher input")
+                return .none
             }
-            self._elements.append(input)
-            self.inputExpectations = nextInputExpectations
-            return fulfilledExpectations
         }
-        for expectation in fulfilledExpectations {
-            expectation.fulfill()
-        }
-        return .unlimited
     }
     
     public func receive(completion: Subscribers.Completion<Failure>) {
-        let fulfilledExpectations: [(XCTestExpectation, count: Int)] = synchronized {
-            var fulfilledExpectations: [(XCTestExpectation, count: Int)] = []
-            fulfilledExpectations.append(contentsOf: completionExpectations.map { ($0, count: 1) })
-            fulfilledExpectations.append(contentsOf: inputExpectations)
-            self._completion = completion
-            self.completionExpectations = []
-            self.inputExpectations = []
-            self.subscription = nil
-            return fulfilledExpectations
-        }
-        for (expectation, count) in fulfilledExpectations {
-            for _ in 0..<count {
-                expectation.fulfill()
+        synchronized {
+            switch state {
+            case let .subscribed(expectations, elements, _):
+                for (expectation, count) in expectations.onInput {
+                    expectation.fulfill(count: count)
+                }
+                for expectation in expectations.onCompletion {
+                    expectation.fulfill()
+                }
+                state = .completed(elements, completion)
+                
+            default:
+                XCTFail("Unexpected publisher completion")
             }
         }
     }
@@ -139,5 +181,13 @@ extension Publisher {
         let recorder = Recorder<Output, Failure>()
         subscribe(recorder)
         return recorder
+    }
+}
+
+extension XCTestExpectation {
+    fileprivate func fulfill(count: Int) {
+        for _ in 0..<count {
+            fulfill()
+        }
     }
 }
