@@ -113,7 +113,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
             case let .waitingForSubscription(expectations):
                 state = .subscribed(expectations, [], subscription)
             default:
-                XCTFail("Unexpected subscription")
+                XCTFail("Publisher recorder is already subscribed")
             }
         }
         subscription.request(.unlimited)
@@ -139,8 +139,12 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 state = .subscribed(expectations, elements, subscription)
                 return .unlimited
                 
-            default:
-                XCTFail("Unexpected publisher input")
+            case .waitingForSubscription:
+                XCTFail("Publisher recorder got unexpected input before subscription: \(String(reflecting: input))")
+                return .none
+                
+            case .completed:
+                XCTFail("Publisher recorder got unexpected input after completion: \(String(reflecting: input))")
                 return .none
             }
         }
@@ -158,8 +162,11 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 }
                 state = .completed(elements, completion)
                 
-            default:
-                XCTFail("Unexpected publisher completion")
+            case .waitingForSubscription:
+                XCTFail("Publisher recorder got unexpected completion before subscription: \(String(describing: completion))")
+                
+            case .completed:
+                XCTFail("Publisher is already completed")
             }
         }
     }
