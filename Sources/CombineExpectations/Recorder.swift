@@ -73,12 +73,12 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 let fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
                 expectation.fulfill(count: fulfillmentCount)
                 
-                var expectations = expectations
                 let remainingCount = expectation.expectedFulfillmentCount - fulfillmentCount
                 if remainingCount > 0 {
+                    var expectations = expectations
                     expectations.onInput.append((expectation, remainingCount: remainingCount))
+                    state = .subscribed(expectations, elements, subscription)
                 }
-                state = .subscribed(expectations, elements, subscription)
                 
             case .completed:
                 expectation.fulfill(count: expectation.expectedFulfillmentCount)
