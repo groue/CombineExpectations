@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 
 ## 0.2.0
 
-Released November 24, 2019
+Released November 24, 2019 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.1.0...v0.2.0)
 
 **Increased robustness**
 
