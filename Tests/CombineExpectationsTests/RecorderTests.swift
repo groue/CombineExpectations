@@ -3,6 +3,7 @@ import Combine
 import Foundation
 import CombineExpectations
 
+/// General tests for publisher expectations
 class RecorderTests: XCTestCase {
     private struct TestError: Error { }
     

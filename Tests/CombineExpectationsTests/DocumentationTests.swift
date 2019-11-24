@@ -2,6 +2,7 @@ import XCTest
 import Combine
 import CombineExpectations
 
+/// Tests for sample code in documentation
 class DocumentationTests: FailureTestCase {
     private struct MyError: Error { }
     

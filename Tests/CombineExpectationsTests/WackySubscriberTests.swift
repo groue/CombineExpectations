@@ -4,8 +4,8 @@ import Foundation
 import CombineExpectations
 
 /// Tests that Recorder fail tests when they are fed with a subscriber that does
-/// not behave correctly, and mess with the Recorder state machine.
-/// 
+/// not behave correctly, and messes with the Recorder state machine.
+///
 /// Our goal is to make it clear that the problem with wacky publishers is
 /// wacky publishers, not this library.
 class WackySubscriberTests: FailureTestCase {
