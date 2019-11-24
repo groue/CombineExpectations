@@ -103,7 +103,7 @@ class FailureTestCase: XCTestCase {
         }
     }
     
-    func testUMissingAnyFailure() {
+    func testMissingAnyFailure() {
         assertFailure("No failure did happen") {
             assertFailure {
             }
