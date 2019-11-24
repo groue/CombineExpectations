@@ -10,6 +10,8 @@
 
 **Contact**: Report bugs and ask questions in [Github issues](https://github.com/groue/CombineExpectations/issues).
 
+:bug: CombineExpectations tests crash or fail until Xcode 11.3. They rely on fixes to Combine that were only introduced in the SDK shipped with Xcode 11.3. However, the library itself works fine right from Xcode 11.0.
+
 ---
 
 Testing Combine publishers with [XCTestExpectation](*https://developer.apple.com/documentation/xctest/xctestexpectation*) often requires setting up a lot of boilerplate code.
