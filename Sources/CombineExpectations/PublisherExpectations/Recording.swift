@@ -28,11 +28,13 @@ extension PublisherExpectations {
         }
         
         public func _value() throws -> Record<Input, Failure>.Recording {
-            let (elements, completion) = recorder.elementsAndCompletion
-            if let completion = completion {
-                return Record<Input, Failure>.Recording(output: elements, completion: completion)
-            } else {
-                throw RecordingError.notCompleted
+            try recorder.expectationValue { (elements, completion, remaining, consume) in
+                if let completion = completion {
+                    consume(remaining.count)
+                    return Record<Input, Failure>.Recording(output: elements, completion: completion)
+                } else {
+                    throw RecordingError.notCompleted
+                }
             }
         }
     }

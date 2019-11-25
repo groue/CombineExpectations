@@ -39,11 +39,14 @@ extension PublisherExpectations {
         }
         
         public func _value() throws {
-            guard let completion = recorder.elementsAndCompletion.completion else {
-                return
-            }
-            if case let .failure(error) = completion {
-                throw error
+            try recorder.expectationValue { (_, completion, remaining, consume) in
+                guard let completion = completion else {
+                    consume(remaining.count)
+                    return
+                }
+                if case let .failure(error) = completion {
+                    throw error
+                }
             }
         }
     }

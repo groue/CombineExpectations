@@ -40,6 +40,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     
     private let lock = NSLock()
     private var state = State.waitingForSubscription(Expectations())
+    private var consumedCount = 0
     
     /// The elements and completion recorded so far.
     public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
@@ -62,6 +63,8 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         defer { lock.unlock() }
         return try execute()
     }
+    
+    // MARK: - PublisherExpectation API
     
     func fulfillOnInput(_ expectation: XCTestExpectation) {
         synchronized {
@@ -104,6 +107,18 @@ public class Recorder<Input, Failure: Error>: Subscriber {
             case .completed:
                 expectation.fulfill()
             }
+        }
+    }
+    
+    func expectationValue<T>(_ value: (_ elements: [Input], _ completion: Subscribers.Completion<Failure>?, _ remaining: ArraySlice<Input>, _ consume: (Int) -> ()) throws -> T) rethrows -> T {
+        try synchronized {
+            let (elements, completion) = state.elementsAndCompletion
+            let remaining = elements[consumedCount...]
+            return try value(elements, completion, remaining, { count in
+                precondition(count >= 0)
+                precondition(count <= remaining.count)
+                consumedCount += count
+            })
         }
     }
     

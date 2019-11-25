@@ -41,14 +41,19 @@ extension PublisherExpectations {
         }
         
         public func _value() throws -> [Input] {
-            let (elements, completion) = recorder.elementsAndCompletion
-            if elements.count >= maxLength {
-                return Array(elements.prefix(maxLength))
+            try recorder.expectationValue { (elements, completion, remaining, consume) in
+                if elements.count >= maxLength {
+                    let result = Array(elements.prefix(maxLength))
+                    let extraCount = max(maxLength + remaining.count - elements.count, 0)
+                    consume(extraCount)
+                    return result
+                }
+                if case let .failure(error) = completion {
+                    throw error
+                }
+                consume(remaining.count)
+                return elements
             }
-            if case let .failure(error) = completion {
-                throw error
-            }
-            return elements
         }
     }
 }
