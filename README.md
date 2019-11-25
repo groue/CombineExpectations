@@ -111,6 +111,8 @@ There are various publisher expectations. Each one waits for a specific publishe
 - [single]: the one and only published element
 - [Inverted Expectations]
 
+---
+
 ### completion
 
 `recorder.completion` is a publisher expectation which waits for the recorded publisher to complete.
@@ -150,6 +152,8 @@ func testCompletionTimeout() throws {
 
 :arrow_right: Related expectations: [finished], [recording].
 
+
+---
 
 ### elements
 
@@ -196,6 +200,8 @@ func testElementsError() throws {
 
 :arrow_right: Related expectations: [last], [prefix], [recording], [single].
 
+
+---
 
 ### finished
 
@@ -265,6 +271,8 @@ func testInvertedFinishedError() throws {
 
 :arrow_right: Related expectations: [completion], [recording].
 
+
+---
 
 ### first
 
@@ -349,6 +357,8 @@ func testInvertedFirstError() throws {
 :arrow_right: Related expectations: [last], [prefix], [single].
 
 
+---
+
 ### last
 
 `recorder.last` is a publisher expectation which waits for the recorded publisher to publish its last element and complete.
@@ -397,6 +407,8 @@ func testLastError() throws {
 
 :arrow_right: Related expectations: [elements], [first], [single].
 
+
+---
 
 ### prefix
 
@@ -486,6 +498,8 @@ func testInvertedPrefixError() throws {
 :arrow_right: Related expectations: [elements], [first].
 
 
+---
+
 ### recording
 
 `recorder.recording` is a publisher expectation which waits for the recorded publisher to complete.
@@ -526,6 +540,8 @@ func testRecordingTimeout() throws {
 
 :arrow_right: Related expectations: [completion], [elements], [finished].
 
+
+---
 
 ### single
 
@@ -590,6 +606,8 @@ func testSingleNoElementsError() throws {
 
 :arrow_right: Related expectations: [elements], [first], [last].
 
+
+---
 
 ### Inverted Expectations
 
