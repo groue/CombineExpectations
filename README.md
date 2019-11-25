@@ -119,7 +119,7 @@ There are various publisher expectations. Each one waits for a specific publishe
 
 :x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
 
-:white_check_mark: Otherwise, a [`Subscribers.Completion`](https://developer.apple.com/documentation/subscribers/completion) is returned.
+:white_check_mark: Otherwise, a [`Subscribers.Completion`](https://developer.apple.com/documentation/combine/subscribers/completion) is returned.
 
 :arrow_right: Related expectations: [finished], [recording].
 
