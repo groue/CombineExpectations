@@ -23,7 +23,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     
     private enum State {
         case waitingForSubscription(Expectations)
-        case subscribed(Expectations, [Input], Subscription)
+        case subscribed(Subscription, Expectations, [Input])
         case completed([Input], Subscribers.Completion<Failure>)
     }
     
@@ -36,7 +36,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
             switch state {
             case .waitingForSubscription:
                 return (elements: [], completion: nil)
-            case let .subscribed(_, elements, _):
+            case let .subscribed(_, _, elements):
                 return (elements: elements, completion: nil)
             case let .completed(elements, completion):
                 return (elements: elements, completion: completion)
@@ -48,7 +48,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     fileprivate init() { }
     
     deinit {
-        if case let .subscribed(_, _, subscription) = state {
+        if case let .subscribed(subscription, _, _) = state {
             subscription.cancel()
         }
     }
@@ -67,7 +67,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 expectations.onInput.append((expectation, remainingCount: expectation.expectedFulfillmentCount))
                 state = .waitingForSubscription(expectations)
                 
-            case let .subscribed(expectations, elements, subscription):
+            case let .subscribed(subscription, expectations, elements):
                 let fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
                 expectation.fulfill(count: fulfillmentCount)
                 
@@ -75,7 +75,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 if remainingCount > 0 {
                     var expectations = expectations
                     expectations.onInput.append((expectation, remainingCount: remainingCount))
-                    state = .subscribed(expectations, elements, subscription)
+                    state = .subscribed(subscription, expectations, elements)
                 }
                 
             case .completed:
@@ -92,10 +92,10 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 expectations.onCompletion.append(expectation)
                 state = .waitingForSubscription(expectations)
                 
-            case let .subscribed(expectations, elements, subscription):
+            case let .subscribed(subscription, expectations, elements):
                 var expectations = expectations
                 expectations.onCompletion.append(expectation)
-                state = .subscribed(expectations, elements, subscription)
+                state = .subscribed(subscription, expectations, elements)
                 
             case .completed:
                 expectation.fulfill()
@@ -109,7 +109,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         synchronized {
             switch state {
             case let .waitingForSubscription(expectations):
-                state = .subscribed(expectations, [], subscription)
+                state = .subscribed(subscription, expectations, [])
             default:
                 XCTFail("Publisher recorder is already subscribed")
             }
@@ -120,7 +120,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(_ input: Input) -> Subscribers.Demand {
         return synchronized {
             switch state {
-            case let .subscribed(expectations, elements, subscription):
+            case let .subscribed(subscription, expectations, elements):
                 var inputExpectations: [(XCTestExpectation, remainingCount: Int)] = []
                 for (expectation, remainingCount) in expectations.onInput {
                     assert(remainingCount > 0)
@@ -134,7 +134,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 var expectations = expectations
                 elements.append(input)
                 expectations.onInput = inputExpectations
-                state = .subscribed(expectations, elements, subscription)
+                state = .subscribed(subscription, expectations, elements)
                 return .unlimited
                 
             case .waitingForSubscription:
@@ -151,7 +151,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(completion: Subscribers.Completion<Failure>) {
         synchronized {
             switch state {
-            case let .subscribed(expectations, elements, _):
+            case let .subscribed(_, expectations, elements):
                 for (expectation, count) in expectations.onInput {
                     expectation.fulfill(count: count)
                 }
