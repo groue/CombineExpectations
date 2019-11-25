@@ -346,7 +346,7 @@ class DocumentationTests: FailureTestCase {
             publisher.send("bar")
             publisher.send(completion: .finished)
             _ = try wait(for: recorder.single, timeout: 0.1)
-        } catch RecordingError.tooManyElements(maximumExpected: 1) { }
+        } catch RecordingError.tooManyElements { }
     }
     
     // FAIL: Caught error RecordingError.notEnoughElements
@@ -356,6 +356,6 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .finished)
             _ = try wait(for: recorder.single, timeout: 0.1)
-        } catch RecordingError.notEnoughElements(minimumExpected: 1) { }
+        } catch RecordingError.notEnoughElements { }
     }
 }

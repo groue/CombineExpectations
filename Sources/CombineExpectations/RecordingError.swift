@@ -7,11 +7,11 @@ public enum RecordingError: Error {
     
     /// The publisher did not publish enough elements.
     /// For example, see `recorder.single`.
-    case notEnoughElements(minimumExpected: Int)
+    case notEnoughElements
     
     /// The publisher did publish too many elements.
     /// For example, see `recorder.single`.
-    case tooManyElements(maximumExpected: Int)
+    case tooManyElements
 }
 
 extension RecordingError: LocalizedError {
@@ -19,10 +19,10 @@ extension RecordingError: LocalizedError {
         switch self {
         case .notCompleted:
             return "RecordingError.notCompleted"
-        case let .notEnoughElements(minimumExpected):
-            return "RecordingError.notEnoughElements(minimumExpected:\(minimumExpected))"
-        case let .tooManyElements(maximumExpected):
-            return "RecordingError.tooManyElements(maximumExpected:\(maximumExpected))"
+        case .notEnoughElements:
+            return "RecordingError.notEnoughElements"
+        case .tooManyElements:
+            return "RecordingError.tooManyElements"
         }
     }
 }
