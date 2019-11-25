@@ -506,7 +506,7 @@ func testInvertedPrefixError() throws {
 
 :x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
 
-:white_check_mark: Otherwise, a [`Record.Recording`](https://developer.apple.com/documentation/combine/ecording) is returned.
+:white_check_mark: Otherwise, a [`Record.Recording`](https://developer.apple.com/documentation/combine/record/recording) is returned.
 
 :arrow_right: Related expectations: [completion], [elements], [finished].
 
