@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 - [0.2.0](#020)
 - [0.1.0](#010)
 
+## Next Release
+
+- [#2](https://github.com/groue/CombineExpectations/pull/2): RecordingError renaming
+
 
 ## 0.2.0
 
