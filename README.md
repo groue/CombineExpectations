@@ -1,4 +1,4 @@
-# CombineExpectations
+# Combine Expectations
 
 ### Utilities for tests that wait for Combine publishers.
 
