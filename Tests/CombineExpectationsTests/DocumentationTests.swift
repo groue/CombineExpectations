@@ -337,7 +337,7 @@ class DocumentationTests: FailureTestCase {
         } catch is MyError { }
     }
     
-    // FAIL: Caught error RecordingError.moreThanOneElement
+    // FAIL: Caught error RecordingError.tooManyElements
     func testSingleMoreThanOneElementError() throws {
         do {
             let publisher = PassthroughSubject<String, Never>()
@@ -346,16 +346,16 @@ class DocumentationTests: FailureTestCase {
             publisher.send("bar")
             publisher.send(completion: .finished)
             _ = try wait(for: recorder.single, timeout: 0.1)
-        } catch RecordingError.moreThanOneElement { }
+        } catch RecordingError.tooManyElements(maximumExpected: 1) { }
     }
     
-    // FAIL: Caught error RecordingError.noElements
+    // FAIL: Caught error RecordingError.notEnoughElements
     func testSingleNoElementsError() throws {
         do {
             let publisher = PassthroughSubject<String, Never>()
             let recorder = publisher.record()
             publisher.send(completion: .finished)
             _ = try wait(for: recorder.single, timeout: 0.1)
-        } catch RecordingError.noElements { }
+        } catch RecordingError.notEnoughElements(minimumExpected: 1) { }
     }
 }

@@ -411,10 +411,10 @@ extension Recorder {
     public var single: PublisherExpectations.Single<Input, Failure> {
         elements.map { elements in
             guard let element = elements.first else {
-                throw RecordingError.noElements
+                throw RecordingError.notEnoughElements(minimumExpected: 1)
             }
             if elements.count > 1 {
-                throw RecordingError.moreThanOneElement
+                throw RecordingError.tooManyElements(maximumExpected: 1)
             }
             return element
         }

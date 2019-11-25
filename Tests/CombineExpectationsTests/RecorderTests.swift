@@ -283,7 +283,7 @@ class RecorderTests: XCTestCase {
         do {
             _ = try wait(for: recorder.single, timeout: 1)
             XCTFail("Expected RecordingError")
-        } catch RecordingError.moreThanOneElement { }
+        } catch RecordingError.tooManyElements(maximumExpected: 1) { }
         
         do {
             try wait(for: recorder.finished, timeout: 1)
@@ -836,7 +836,7 @@ class RecorderTests: XCTestCase {
             let recorder = publisher.record()
             _ = try wait(for: recorder.single, timeout: 1)
             XCTFail("Expected RecordingError")
-        } catch RecordingError.noElements { }
+        } catch RecordingError.notEnoughElements(minimumExpected: 1) { }
         do {
             let publisher = (0..<1).publisher
             let recorder = publisher.record()
@@ -848,7 +848,7 @@ class RecorderTests: XCTestCase {
             let recorder = publisher.record()
             _ = try wait(for: recorder.single, timeout: 1)
             XCTFail("Expected RecordingError")
-        } catch RecordingError.moreThanOneElement { }
+        } catch RecordingError.tooManyElements(maximumExpected: 1) { }
     }
     
     func testWaitForSingleAsync() throws {
@@ -857,7 +857,7 @@ class RecorderTests: XCTestCase {
             let recorder = publisher.record()
             _ = try wait(for: recorder.single, timeout: 1)
             XCTFail("Expected RecordingError")
-        } catch RecordingError.noElements { }
+        } catch RecordingError.notEnoughElements(minimumExpected: 1) { }
         do {
             let publisher = (0..<1).publisher.receive(on: DispatchQueue.main)
             let recorder = publisher.record()
@@ -869,7 +869,7 @@ class RecorderTests: XCTestCase {
             let recorder = publisher.record()
             _ = try wait(for: recorder.single, timeout: 1)
             XCTFail("Expected RecordingError")
-        } catch RecordingError.moreThanOneElement { }
+        } catch RecordingError.tooManyElements(maximumExpected: 1) { }
     }
     
     func testWaitForSingleFailure() throws {

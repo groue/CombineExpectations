@@ -585,7 +585,7 @@ func testSingleError() throws {
     let element = try wait(for: recorder.single, timeout: 1)
 }
     
-// FAIL: Caught error RecordingError.moreThanOneElement
+// FAIL: Caught error RecordingError.tooManyElements
 func testSingleMoreThanOneElementError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
@@ -595,7 +595,7 @@ func testSingleMoreThanOneElementError() throws {
     let element = try wait(for: recorder.single, timeout: 1)
 }
     
-// FAIL: Caught error RecordingError.noElements
+// FAIL: Caught error RecordingError.notEnoughElements
 func testSingleNoElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
