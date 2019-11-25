@@ -242,7 +242,7 @@ extension Recorder {
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
-    /// to complete successfully.
+    /// to complete.
     ///
     /// When waiting for this expectation, an error is thrown if the publisher
     /// fails with an error.
@@ -303,7 +303,7 @@ extension Recorder {
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
-    /// to publish its last element and complete.
+    /// to complete.
     ///
     /// When waiting for this expectation, a RecordingError.notCompleted is
     /// thrown if the publisher does not complete on time, and the publisher
@@ -390,7 +390,7 @@ extension Recorder {
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
-    /// to publish exactly one element and complete.
+    /// to complete.
     ///
     /// When waiting for this expectation, a RecordingError is thrown if the
     /// publisher does not complete on time, or does not publish exactly one

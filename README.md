@@ -205,7 +205,7 @@ func testElementsError() throws {
 
 ### finished
 
-`recorder.finished` is a publisher expectation which waits for the recorded publisher to complete successfully.
+`recorder.finished` is a publisher expectation which waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, an error is thrown if the publisher fails with an error.
 
@@ -361,7 +361,7 @@ func testInvertedFirstError() throws {
 
 ### last
 
-`recorder.last` is a publisher expectation which waits for the recorded publisher to publish its last element and complete.
+`recorder.last` is a publisher expectation which waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time, and the publisher error is thrown if the publisher fails.
 
@@ -545,7 +545,7 @@ func testRecordingTimeout() throws {
 
 ### single
 
-`recorder.single` is a publisher expectation which waits for the recorded publisher to publish exactly one element and complete.
+`recorder.single` is a publisher expectation which waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, a `RecordingError` is thrown if the publisher does not complete on time, or does not publish exactly one element before it completes. The publisher error is thrown if the publisher fails.
 
