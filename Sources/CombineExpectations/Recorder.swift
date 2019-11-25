@@ -25,6 +25,17 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         case waitingForSubscription(Expectations)
         case subscribed(Subscription, Expectations, [Input])
         case completed([Input], Subscribers.Completion<Failure>)
+        
+        var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
+            switch self {
+            case .waitingForSubscription:
+                return (elements: [], completion: nil)
+            case let .subscribed(_, _, elements):
+                return (elements: elements, completion: nil)
+            case let .completed(elements, completion):
+                return (elements: elements, completion: completion)
+            }
+        }
     }
     
     private let lock = NSLock()
@@ -33,14 +44,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     /// The elements and completion recorded so far.
     public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
         synchronized {
-            switch state {
-            case .waitingForSubscription:
-                return (elements: [], completion: nil)
-            case let .subscribed(_, _, elements):
-                return (elements: elements, completion: nil)
-            case let .completed(elements, completion):
-                return (elements: elements, completion: completion)
-            }
+            state.elementsAndCompletion
         }
     }
     
