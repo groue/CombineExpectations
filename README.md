@@ -102,7 +102,7 @@ Add a dependency for CombineExpectations to your [Swift Package](https://swift.o
 There are various publisher expectations. Each one waits for a specific publisher aspect:
 
 - [completion]: the publisher completion
-- [elements]: all published elements
+- [elements]: all published elements until completion
 - [finished]: the publisher successful completion
 - [first]: the first published element
 - [last]: the last published element
@@ -115,9 +115,9 @@ There are various publisher expectations. Each one waits for a specific publishe
 
 `recorder.completion` is a publisher expectation which waits for the recorded publisher to complete.
 
-When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
+:x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
 
-Otherwise, a [`Subscribers.Completion`](https://developer.apple.com/documentation/subscribers/completion) is returned.
+:white_check_mark: Otherwise, a [`Subscribers.Completion`](https://developer.apple.com/documentation/subscribers/completion) is returned.
 
 For example:
 
@@ -148,14 +148,16 @@ func testCompletionTimeout() throws {
 
 </details>
 
+:arrow_right: Related expectations: [finished], [recording].
+
 
 ### elements
 
 `recorder.elements` is a publisher expectation which waits for the recorded publisher to complete.
 
-When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time, and the publisher error is thrown if the publisher fails.
+:x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time, and the publisher error is thrown if the publisher fails.
 
-Otherwise, an array of published elements is returned.
+:white_check_mark: Otherwise, an array of published elements is returned.
 
 For example:
 
@@ -192,12 +194,14 @@ func testElementsError() throws {
 
 </details>
 
+:arrow_right: Related expectations: [last], [prefix], [recording], [single].
+
 
 ### finished
 
 `recorder.finished` is a publisher expectation which waits for the recorded publisher to complete successfully.
 
-When waiting for this expectation, an error is thrown if the publisher fails with an error.
+:x: When waiting for this expectation, an error is thrown if the publisher fails with an error.
 
 For example:
 
@@ -259,14 +263,16 @@ func testInvertedFinishedError() throws {
 
 </details>
 
+:arrow_right: Related expectations: [completion], [recording].
+
 
 ### first
 
 `recorder.first` is a publisher expectation which waits for the recorded publisher to emit one element, or to complete.
 
-When waiting for this expectation, an error is thrown if the publisher fails before any element is published.
+:x: When waiting for this expectation, an error is thrown if the publisher fails before any element is published.
 
-Otherwise, the first published element is returned, unless the publisher completes before it publishes any element.
+:white_check_mark: Otherwise, the first published element is returned, unless the publisher completes before it publishes any element.
 
 For example:
 
@@ -340,14 +346,16 @@ func testInvertedFirstError() throws {
 
 </details>
 
+:arrow_right: Related expectations: [last], [prefix], [single].
+
 
 ### last
 
 `recorder.last` is a publisher expectation which waits for the recorded publisher to publish its last element and complete.
 
-When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time, and the publisher error is thrown if the publisher fails.
+:x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time, and the publisher error is thrown if the publisher fails.
 
-Otherwise, the last published element is returned, unless the publisher completes before it publishes any element.
+:white_check_mark: Otherwise, the last published element is returned, unless the publisher completes before it publishes any element.
 
 For example:
 
@@ -387,14 +395,16 @@ func testLastError() throws {
 
 </details>
 
+:arrow_right: Related expectations: [elements], [first], [single].
+
 
 ### prefix
 
 `recorder.prefix(maxLength)` is a publisher expectation which waits for the recorded publisher to emit a certain number of elements, or to complete.
 
-When waiting for this expectation, an error is thrown if the publisher fails before `maxLength` elements are published.
+:x: When waiting for this expectation, an error is thrown if the publisher fails before `maxLength` elements are published.
 
-Otherwise, an array of received elements is returned, containing at most `maxLength` elements, or less if the publisher completes early.
+:white_check_mark: Otherwise, an array of received elements is returned, containing at most `maxLength` elements, or less if the publisher completes early.
 
 For example:
 
@@ -473,14 +483,16 @@ func testInvertedPrefixError() throws {
 
 </details>
 
+:arrow_right: Related expectations: [elements], [first].
+
 
 ### recording
 
 `recorder.recording` is a publisher expectation which waits for the recorded publisher to complete.
 
-When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
+:x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
 
-Otherwise, a [`Record.Recording`](https://developer.apple.com/documentation/combine/ecording) is returned.
+:white_check_mark: Otherwise, a [`Record.Recording`](https://developer.apple.com/documentation/combine/ecording) is returned.
 
 For example:
 
@@ -512,14 +524,16 @@ func testRecordingTimeout() throws {
 
 </details>
 
+:arrow_right: Related expectations: [completion], [elements], [finished].
+
 
 ### single
 
 `recorder.single` is a publisher expectation which waits for the recorded publisher to publish exactly one element and complete.
 
-When waiting for this expectation, a `RecordingError` is thrown if the publisher does not complete on time, or does not publish exactly one element before it completes. The publisher error is thrown if the publisher fails.
+:x: When waiting for this expectation, a `RecordingError` is thrown if the publisher does not complete on time, or does not publish exactly one element before it completes. The publisher error is thrown if the publisher fails.
 
-Otherwise, the single published element is returned.
+:white_check_mark: Otherwise, the single published element is returned.
 
 For example:
 
@@ -573,6 +587,8 @@ func testSingleNoElementsError() throws {
 ```
 
 </details>
+
+:arrow_right: Related expectations: [elements], [first], [last].
 
 
 ### Inverted Expectations
