@@ -329,7 +329,7 @@ extension Recorder {
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
-    /// to emit a certain number of elements, or to complete.
+    /// to emit `maxLength` elements, or to complete.
     ///
     /// When waiting for this expectation, an error is thrown if the publisher
     /// fails before `maxLength` elements are published.

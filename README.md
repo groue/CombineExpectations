@@ -412,7 +412,7 @@ func testLastError() throws {
 
 ### prefix
 
-:clock230: `recorder.prefix(maxLength)` waits for the recorded publisher to emit a certain number of elements, or to complete.
+:clock230: `recorder.prefix(maxLength)` waits for the recorded publisher to emit `maxLength` elements, or to complete.
 
 :x: When waiting for this expectation, an error is thrown if the publisher fails before `maxLength` elements are published.
 
