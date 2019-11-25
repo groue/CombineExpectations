@@ -28,7 +28,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     }
     
     private let lock = NSLock()
-    private var state: State = .waitingForSubscription(Expectations())
+    private var state = State.waitingForSubscription(Expectations())
     
     /// The elements and completion recorded so far.
     public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
