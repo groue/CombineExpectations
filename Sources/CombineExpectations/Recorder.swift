@@ -347,6 +347,14 @@ extension Recorder {
         elements.map { $0.last }
     }
     
+    public func next() -> PublisherExpectations.Map<PublisherExpectations.Next<Input, Failure>, Input> {
+        return next(1).map { $0[0] }
+    }
+    
+    public func next(_ count: Int) -> PublisherExpectations.Next<Input, Failure> {
+        PublisherExpectations.Next(recorder: self, count: count)
+    }
+    
     /// Returns a publisher expectation which waits for the recorded publisher
     /// to emit `maxLength` elements, or to complete.
     ///
