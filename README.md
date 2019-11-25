@@ -115,7 +115,7 @@ There are various publisher expectations. Each one waits for a specific publishe
 
 ### completion
 
-`recorder.completion` waits for the recorded publisher to complete.
+:clock230: `recorder.completion` waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
 
@@ -157,7 +157,7 @@ func testCompletionTimeout() throws {
 
 ### elements
 
-`recorder.elements` waits for the recorded publisher to complete.
+:clock230: `recorder.elements` waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time, and the publisher error is thrown if the publisher fails.
 
@@ -205,7 +205,7 @@ func testElementsError() throws {
 
 ### finished
 
-`recorder.finished` waits for the recorded publisher to complete.
+:clock230: `recorder.finished` waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, an error is thrown if the publisher fails with an error.
 
@@ -276,7 +276,7 @@ func testInvertedFinishedError() throws {
 
 ### first
 
-`recorder.first` waits for the recorded publisher to emit one element, or to complete.
+:clock230: `recorder.first` waits for the recorded publisher to emit one element, or to complete.
 
 :x: When waiting for this expectation, an error is thrown if the publisher fails before any element is published.
 
@@ -361,7 +361,7 @@ func testInvertedFirstError() throws {
 
 ### last
 
-`recorder.last` waits for the recorded publisher to complete.
+:clock230: `recorder.last` waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time, and the publisher error is thrown if the publisher fails.
 
@@ -412,7 +412,7 @@ func testLastError() throws {
 
 ### prefix
 
-`recorder.prefix(maxLength)` waits for the recorded publisher to emit a certain number of elements, or to complete.
+:clock230: `recorder.prefix(maxLength)` waits for the recorded publisher to emit a certain number of elements, or to complete.
 
 :x: When waiting for this expectation, an error is thrown if the publisher fails before `maxLength` elements are published.
 
@@ -502,7 +502,7 @@ func testInvertedPrefixError() throws {
 
 ### recording
 
-`recorder.recording` waits for the recorded publisher to complete.
+:clock230: `recorder.recording` waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, a `RecordingError.notCompleted` is thrown if the publisher does not complete on time.
 
@@ -545,7 +545,7 @@ func testRecordingTimeout() throws {
 
 ### single
 
-`recorder.single` waits for the recorded publisher to complete.
+:clock230: `recorder.single` waits for the recorded publisher to complete.
 
 :x: When waiting for this expectation, a `RecordingError` is thrown if the publisher does not complete on time, or does not publish exactly one element before it completes. The publisher error is thrown if the publisher fails.
 
