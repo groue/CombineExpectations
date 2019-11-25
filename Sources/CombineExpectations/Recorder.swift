@@ -244,8 +244,8 @@ extension Recorder {
     /// Returns a publisher expectation which waits for the recorded publisher
     /// to complete.
     ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// fails with an error.
+    /// When waiting for this expectation, the publisher error is thrown if the
+    /// publisher fails.
     ///
     /// For example:
     ///
@@ -271,8 +271,8 @@ extension Recorder {
     /// Returns a publisher expectation which waits for the recorded publisher
     /// to emit one element, or to complete.
     ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// fails before any element is published.
+    /// When waiting for this expectation, the publisher error is thrown if the
+    /// publisher fails before publishing any element.
     ///
     /// Otherwise, the first published element is returned, or nil if the publisher
     /// completes before it publishes any element.
@@ -331,8 +331,8 @@ extension Recorder {
     /// Returns a publisher expectation which waits for the recorded publisher
     /// to emit `maxLength` elements, or to complete.
     ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// fails before `maxLength` elements are published.
+    /// When waiting for this expectation, the publisher error is thrown if the
+    /// publisher fails before `maxLength` elements are published.
     ///
     /// Otherwise, an array of received elements is returned, containing at
     /// most `maxLength` elements, or less if the publisher completes early.

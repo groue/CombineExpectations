@@ -207,7 +207,7 @@ func testElementsError() throws {
 
 :clock230: `recorder.finished` waits for the recorded publisher to complete.
 
-:x: When waiting for this expectation, an error is thrown if the publisher fails with an error.
+:x: When waiting for this expectation, the publisher error is thrown if the publisher fails.
 
 :arrow_right: Related expectations: [completion], [recording].
 
@@ -278,7 +278,7 @@ func testInvertedFinishedError() throws {
 
 :clock230: `recorder.first` waits for the recorded publisher to emit one element, or to complete.
 
-:x: When waiting for this expectation, an error is thrown if the publisher fails before any element is published.
+:x: When waiting for this expectation, the publisher error is thrown if the publisher fails before publishing any element.
 
 :white_check_mark: Otherwise, the first published element is returned, or nil if the publisher completes before it publishes any element.
 
@@ -414,7 +414,7 @@ func testLastError() throws {
 
 :clock230: `recorder.prefix(maxLength)` waits for the recorded publisher to emit `maxLength` elements, or to complete.
 
-:x: When waiting for this expectation, an error is thrown if the publisher fails before `maxLength` elements are published.
+:x: When waiting for this expectation, the publisher error is thrown if the publisher fails before `maxLength` elements are published.
 
 :white_check_mark: Otherwise, an array of received elements is returned, containing at most `maxLength` elements, or less if the publisher completes early.
 
