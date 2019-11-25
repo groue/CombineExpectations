@@ -309,7 +309,7 @@ extension Recorder {
     /// thrown if the publisher does not complete on time, and the publisher
     /// error is thrown if the publisher fails.
     ///
-    /// Otherwise, the last published element is returned, unless the publisher
+    /// Otherwise, the last published element is returned, or nil if the publisher
     /// completes before it publishes any element.
     ///
     /// For example:
