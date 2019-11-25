@@ -121,7 +121,9 @@ There are various publisher expectations. Each one waits for a specific publishe
 
 :white_check_mark: Otherwise, a [`Subscribers.Completion`](https://developer.apple.com/documentation/subscribers/completion) is returned.
 
-For example:
+:arrow_right: Related expectations: [finished], [recording].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -150,8 +152,6 @@ func testCompletionTimeout() throws {
 
 </details>
 
-:arrow_right: Related expectations: [finished], [recording].
-
 
 ---
 
@@ -163,7 +163,9 @@ func testCompletionTimeout() throws {
 
 :white_check_mark: Otherwise, an array of published elements is returned.
 
-For example:
+:arrow_right: Related expectations: [last], [prefix], [recording], [single].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -198,8 +200,6 @@ func testElementsError() throws {
 
 </details>
 
-:arrow_right: Related expectations: [last], [prefix], [recording], [single].
-
 
 ---
 
@@ -209,7 +209,9 @@ func testElementsError() throws {
 
 :x: When waiting for this expectation, an error is thrown if the publisher fails with an error.
 
-For example:
+:arrow_right: Related expectations: [completion], [recording].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -269,8 +271,6 @@ func testInvertedFinishedError() throws {
 
 </details>
 
-:arrow_right: Related expectations: [completion], [recording].
-
 
 ---
 
@@ -282,7 +282,9 @@ func testInvertedFinishedError() throws {
 
 :white_check_mark: Otherwise, the first published element is returned, or nil if the publisher completes before it publishes any element.
 
-For example:
+:arrow_right: Related expectations: [last], [prefix], [single].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -354,8 +356,6 @@ func testInvertedFirstError() throws {
 
 </details>
 
-:arrow_right: Related expectations: [last], [prefix], [single].
-
 
 ---
 
@@ -367,7 +367,9 @@ func testInvertedFirstError() throws {
 
 :white_check_mark: Otherwise, the last published element is returned, or nil if the publisher completes before it publishes any element.
 
-For example:
+:arrow_right: Related expectations: [elements], [first], [single].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -405,8 +407,6 @@ func testLastError() throws {
 
 </details>
 
-:arrow_right: Related expectations: [elements], [first], [single].
-
 
 ---
 
@@ -418,7 +418,9 @@ func testLastError() throws {
 
 :white_check_mark: Otherwise, an array of received elements is returned, containing at most `maxLength` elements, or less if the publisher completes early.
 
-For example:
+:arrow_right: Related expectations: [elements], [first].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -495,8 +497,6 @@ func testInvertedPrefixError() throws {
 
 </details>
 
-:arrow_right: Related expectations: [elements], [first].
-
 
 ---
 
@@ -508,7 +508,9 @@ func testInvertedPrefixError() throws {
 
 :white_check_mark: Otherwise, a [`Record.Recording`](https://developer.apple.com/documentation/combine/ecording) is returned.
 
-For example:
+:arrow_right: Related expectations: [completion], [elements], [finished].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -538,8 +540,6 @@ func testRecordingTimeout() throws {
 
 </details>
 
-:arrow_right: Related expectations: [completion], [elements], [finished].
-
 
 ---
 
@@ -551,7 +551,9 @@ func testRecordingTimeout() throws {
 
 :white_check_mark: Otherwise, the single published element is returned.
 
-For example:
+:arrow_right: Related expectations: [elements], [first], [last].
+
+Example:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -603,8 +605,6 @@ func testSingleNoElementsError() throws {
 ```
 
 </details>
-
-:arrow_right: Related expectations: [elements], [first], [last].
 
 
 ---
