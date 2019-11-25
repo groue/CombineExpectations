@@ -274,7 +274,7 @@ extension Recorder {
     /// When waiting for this expectation, an error is thrown if the publisher
     /// fails before any element is published.
     ///
-    /// Otherwise, the first published element is returned, unless the publisher
+    /// Otherwise, the first published element is returned, or nil if the publisher
     /// completes before it publishes any element.
     ///
     /// For example:
