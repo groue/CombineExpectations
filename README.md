@@ -337,7 +337,7 @@ func testPassthroughSubjectDoesNotPublishAnyElement() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Fulfilled inverted expectation
 func testInvertedFirstTooEarly() throws {
     let publisher = PassthroughSubject<String, Never>()
@@ -389,7 +389,7 @@ func testArrayPublisherPublishesLastElementLast() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notCompleted
 func testLastTimeout() throws {
@@ -441,7 +441,7 @@ func testArrayOfTwoElementsPublishesElementsInOrder() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notEnoughElements
 func testNextTimeout() throws {
@@ -464,6 +464,41 @@ func testNextNotEnoughElementsError() throws {
     let recorder = publisher.record()
     publisher.send(completion: .finished)
     let element = try wait(for: recorder.next(), timeout: 1)
+}
+```
+
+</details>
+
+This publisher expectation can be [inverted]:
+
+```swift
+// SUCCESS: no timeout, no error
+func testPassthroughSubjectDoesNotPublishAnyElement() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    try wait(for: recorder.next().inverted, timeout: 1)
+}
+```
+
+<details>
+    <summary>Examples of failing tests</summary>
+
+```swift
+// FAIL: Fulfilled inverted expectation
+func testInvertedNextTooEarly() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    try wait(for: recorder.next().inverted, timeout: 0.1)
+}
+
+// FAIL: Fulfilled inverted expectation
+// FAIL: Caught error MyError
+func testInvertedNextError() throws {
+    let publisher = PassthroughSubject<String, MyError>()
+    let recorder = publisher.record()
+    publisher.send(completion: .failure(MyError()))
+    try wait(for: recorder.next().inverted, timeout: 0.1)
 }
 ```
 
@@ -501,7 +536,7 @@ func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notEnoughElements
 func testNextCountTimeout() throws {
@@ -560,7 +595,7 @@ func testArrayOfThreeElementsPublishesTwoFirstElementsWithoutError() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 func testPrefixTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
@@ -653,7 +688,7 @@ func testArrayPublisherRecording() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notCompleted
 func testRecordingTimeout() throws {
@@ -693,7 +728,7 @@ func testJustPublishesExactlyOneElement() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notCompleted
 func testSingleTimeout() throws {

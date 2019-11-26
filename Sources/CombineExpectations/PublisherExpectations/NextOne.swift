@@ -2,27 +2,27 @@ import XCTest
 
 extension PublisherExpectations {
     /// A publisher expectation which waits for the recorded publisher to emit
-    /// `count` elements, or to complete.
+    /// one element, or to complete.
     ///
     /// When waiting for this expectation, a RecordingError is thrown if the
-    /// publisher does not publish `count` elements after last waited
-    /// expectation. The publisher error is thrown if the publisher fails before
-    /// publishing `count` elements.
+    /// publisher does not publish one element after last waited expectation.
+    /// The publisher error is thrown if the publisher fails before
+    /// publishing one element.
     ///
-    /// Otherwise, an array of exactly `count` element is returned.
+    /// Otherwise, the next published element is returned.
     ///
     /// For example:
     ///
     ///     // SUCCESS: no timeout, no error
-    ///     func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
-    ///         let publisher = ["foo", "bar", "baz"].publisher
+    ///     func testArrayOfTwoElementsPublishesElementsInOrder() throws {
+    ///         let publisher = ["foo", "bar"].publisher
     ///         let recorder = publisher.record()
     ///
-    ///         var elements = try wait(for: recorder.next(2), timeout: 1)
-    ///         XCTAssertEqual(elements, ["foo", "bar"])
+    ///         var element = try wait(for: recorder.next(), timeout: 1)
+    ///         XCTAssertEqual(element, "foo")
     ///
-    ///         elements = try wait(for: recorder.next(1), timeout: 1)
-    ///         XCTAssertEqual(elements, ["baz"])
+    ///         element = try wait(for: recorder.next(), timeout: 1)
+    ///         XCTAssertEqual(element, "bar")
     ///     }
     public struct NextOne<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
@@ -45,13 +45,43 @@ extension PublisherExpectations {
             }
         }
         
-        /// TODO
+        /// Returns an inverted publisher expectation which waits for the
+        /// recorded publisher to emit one element, or to complete.
+        ///
+        /// When waiting for this expectation, a RecordingError is thrown if the
+        /// publisher does not publish one element after last waited
+        /// expectation. The publisher error is thrown if the publisher fails
+        /// before publishing one element.
+        ///
+        /// For example:
+        ///
+        ///     // SUCCESS: no timeout, no error
+        ///     func testPassthroughSubjectDoesNotPublishAnyElement() throws {
+        ///         let publisher = PassthroughSubject<String, Never>()
+        ///         let recorder = publisher.record()
+        ///         try wait(for: recorder.next().inverted, timeout: 1)
+        ///     }
         public var inverted: NextOneInverted<Input, Failure> {
             return NextOneInverted(recorder: recorder)
         }
     }
     
-    /// TODO
+    /// An inverted publisher expectation which waits for the recorded publisher
+    /// to emit one element, or to complete.
+    ///
+    /// When waiting for this expectation, a RecordingError is thrown if the
+    /// publisher does not publish one element after last waited expectation.
+    /// The publisher error is thrown if the publisher fails before
+    /// publishing one element.
+    ///
+    /// For example:
+    ///
+    ///     // SUCCESS: no timeout, no error
+    ///     func testPassthroughSubjectDoesNotPublishAnyElement() throws {
+    ///         let publisher = PassthroughSubject<String, Never>()
+    ///         let recorder = publisher.record()
+    ///         try wait(for: recorder.next().inverted, timeout: 1)
+    ///     }
     public struct NextOneInverted<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         

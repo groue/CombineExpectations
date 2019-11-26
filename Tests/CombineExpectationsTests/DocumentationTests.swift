@@ -269,6 +269,39 @@ class DocumentationTests: FailureTestCase {
         } catch RecordingError.notEnoughElements { }
     }
     
+    // MARK: - next().inverted
+    
+    // SUCCESS: no timeout, no error
+    func testPassthroughSubjectDoesNotPublishAnyElement2() throws {
+        let publisher = PassthroughSubject<String, Never>()
+        let recorder = publisher.record()
+        try wait(for: recorder.next().inverted, timeout: 0.1)
+    }
+    
+    // FAIL: Fulfilled inverted expectation
+    func testInvertedNextTooEarly() throws {
+        try assertFailure("Fulfilled inverted expectation") {
+            let publisher = PassthroughSubject<String, Never>()
+            let recorder = publisher.record()
+            publisher.send("foo")
+            try wait(for: recorder.next().inverted, timeout: 0.1)
+        }
+    }
+    
+    // FAIL: Fulfilled inverted expectation
+    // FAIL: Caught error MyError
+    func testInvertedNextError() throws {
+        try assertFailure("Fulfilled inverted expectation") {
+            do {
+                let publisher = PassthroughSubject<String, MyError>()
+                let recorder = publisher.record()
+                publisher.send(completion: .failure(MyError()))
+                try wait(for: recorder.next().inverted, timeout: 0.1)
+                XCTFail("Expected error")
+            } catch is MyError { }
+        }
+    }
+    
     // MARK: - next(count)
     
     // SUCCESS: no timeout, no error
@@ -320,7 +353,7 @@ class DocumentationTests: FailureTestCase {
             XCTFail("Expected error")
         } catch RecordingError.notEnoughElements { }
     }
-
+    
     // MARK: - Prefix
     
     // SUCCESS: no timeout, no error
