@@ -66,8 +66,8 @@ class PublisherTests: XCTestCase {
         // Wait for first element
         _ = try wait(for: recorder.first, timeout: ...)
         
-        // Wait for second element
-        _ = try wait(for: recorder.prefix(2), timeout: ...)
+        // Wait for next element
+        _ = try wait(for: recorder.next(), timeout: ...)
         
         // Wait for successful completion
         try wait(for: recorder.finished, timeout: ...)
