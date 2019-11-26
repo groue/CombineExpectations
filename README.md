@@ -111,7 +111,6 @@ There are various publisher expectations. Each one waits for a specific publishe
 - [prefix(maxLength)]: the first N published elements
 - [recording]: the full recording of publisher events
 - [single]: the one and only published element
-- [Inverted Expectations]
 
 ---
 
@@ -246,7 +245,7 @@ func testFinishedError() throws {
 
 </details>
 
-This publisher expectation can be [inverted]:
+`recorder.finished` can be inverted:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -323,7 +322,7 @@ func testFirstError() throws {
 
 </details>
 
-This publisher expectation can be [inverted]:
+`recorder.first` can be inverted:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -469,7 +468,7 @@ func testNextNotEnoughElementsError() throws {
 
 </details>
 
-This publisher expectation can be [inverted]:
+`recorder.next()` can be inverted:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -616,7 +615,7 @@ func testPrefixError() throws {
 
 </details>
 
-This publisher expectation can be [inverted]:
+`recorder.prefix(maxLength)` can be inverted:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -767,25 +766,6 @@ func testSingleNotEnoughElementsError() throws {
 </details>
 
 
----
-
-### Inverted Expectations
-
-Some expectations can be inverted ([finished], [first], [prefix(maxLength)]). An inverted expectation fails if the base expectation fulfills within the specified timeout.
-
-When waiting for an inverted expectation, you receive the same result and eventual error as the base expectation.
-
-For example:
-
-```swift
-// SUCCESS: no timeout, no error
-func testPassthroughSubjectDoesNotFinish() throws {
-    let publisher = PassthroughSubject<String, Never>()
-    let recorder = publisher.record()
-    try wait(for: recorder.finished.inverted, timeout: 1)
-}
-```
-
 [Release Notes]: CHANGELOG.md
 [Usage]: #usage
 [Installation]: #installation
@@ -800,5 +780,3 @@ func testPassthroughSubjectDoesNotFinish() throws {
 [elements]: #elements
 [last]: #last
 [single]: #single
-[Inverted Expectations]: #inverted-expectations
-[inverted]: #inverted-expectations
