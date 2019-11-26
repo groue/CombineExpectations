@@ -26,6 +26,7 @@ class DocumentationTests: FailureTestCase {
                 let publisher = PassthroughSubject<String, Never>()
                 let recorder = publisher.record()
                 _ = try wait(for: recorder.completion, timeout: 0.1)
+                XCTFail("Expected error")
             } catch RecordingError.notCompleted { }
         }
     }
@@ -48,6 +49,7 @@ class DocumentationTests: FailureTestCase {
                 let publisher = PassthroughSubject<String, Never>()
                 let recorder = publisher.record()
                 _ = try wait(for: recorder.elements, timeout: 0.1)
+                XCTFail("Expected error")
             } catch RecordingError.notCompleted { }
         }
     }
@@ -59,6 +61,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .failure(MyError()))
             _ = try wait(for: recorder.elements, timeout: 0.1)
+            XCTFail("Expected error")
         } catch is MyError { }
     }
     
@@ -87,6 +90,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .failure(MyError()))
             try wait(for: recorder.finished, timeout: 0.1)
+            XCTFail("Expected error")
         } catch is MyError { }
     }
     
@@ -108,6 +112,7 @@ class DocumentationTests: FailureTestCase {
                 let recorder = publisher.record()
                 publisher.send(completion: .failure(MyError()))
                 try wait(for: recorder.finished.inverted, timeout: 0.1)
+                XCTFail("Expected error")
             } catch is MyError { }
         }
     }
@@ -141,6 +146,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .failure(MyError()))
             _ = try wait(for: recorder.first, timeout: 0.1)
+            XCTFail("Expected error")
         } catch is MyError { }
     }
     
@@ -172,6 +178,7 @@ class DocumentationTests: FailureTestCase {
                 let recorder = publisher.record()
                 publisher.send(completion: .failure(MyError()))
                 _ = try wait(for: recorder.first.inverted, timeout: 0.1)
+                XCTFail("Expected error")
             } catch is MyError { }
         }
     }
@@ -197,6 +204,7 @@ class DocumentationTests: FailureTestCase {
                 let publisher = PassthroughSubject<String, Never>()
                 let recorder = publisher.record()
                 _ = try wait(for: recorder.last, timeout: 0.1)
+                XCTFail("Expected error")
             } catch RecordingError.notCompleted { }
         }
     }
@@ -208,6 +216,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .failure(MyError()))
             _ = try wait(for: recorder.last, timeout: 0.1)
+            XCTFail("Expected error")
         } catch is MyError { }
     }
     
@@ -218,10 +227,10 @@ class DocumentationTests: FailureTestCase {
         let publisher = ["foo", "bar"].publisher
         let recorder = publisher.record()
         
-        var element = try wait(for: recorder.next(), timeout: 1)
+        var element = try wait(for: recorder.next(), timeout: 0.1)
         XCTAssertEqual(element, "foo")
         
-        element = try wait(for: recorder.next(), timeout: 1)
+        element = try wait(for: recorder.next(), timeout: 0.1)
         XCTAssertEqual(element, "bar")
     }
     
@@ -233,6 +242,7 @@ class DocumentationTests: FailureTestCase {
                 let publisher = PassthroughSubject<String, Never>()
                 let recorder = publisher.record()
                 _ = try wait(for: recorder.next(), timeout: 0.1)
+                XCTFail("Expected error")
             } catch RecordingError.notEnoughElements { }
         }
     }
@@ -244,6 +254,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .failure(MyError()))
             _ = try wait(for: recorder.next(), timeout: 0.1)
+            XCTFail("Expected error")
         } catch is MyError { }
     }
     
@@ -254,6 +265,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .finished)
             _ = try wait(for: recorder.next(), timeout: 0.1)
+            XCTFail("Expected error")
         } catch RecordingError.notEnoughElements { }
     }
     
@@ -264,13 +276,51 @@ class DocumentationTests: FailureTestCase {
         let publisher = ["foo", "bar", "baz"].publisher
         let recorder = publisher.record()
         
-        var elements = try wait(for: recorder.next(2), timeout: 1)
+        var elements = try wait(for: recorder.next(2), timeout: 0.1)
         XCTAssertEqual(elements, ["foo", "bar"])
         
-        elements = try wait(for: recorder.next(1), timeout: 1)
+        elements = try wait(for: recorder.next(1), timeout: 0.1)
         XCTAssertEqual(elements, ["baz"])
     }
     
+    // FAIL: Asynchronous wait failed
+    // FAIL: Caught error RecordingError.notEnoughElements
+    func testNextCountTimeout() throws {
+        try assertFailure("Asynchronous wait failed") {
+            do {
+                let publisher = PassthroughSubject<String, Never>()
+                let recorder = publisher.record()
+                publisher.send("foo")
+                _ = try wait(for: recorder.next(2), timeout: 0.1)
+                XCTFail("Expected error")
+            } catch RecordingError.notEnoughElements { }
+        }
+    }
+    
+    // FAIL: Caught error MyError
+    func testNextCountError() throws {
+        do {
+            let publisher = PassthroughSubject<String, MyError>()
+            let recorder = publisher.record()
+            publisher.send("foo")
+            publisher.send(completion: .failure(MyError()))
+            _ = try wait(for: recorder.next(2), timeout: 0.1)
+            XCTFail("Expected error")
+        } catch is MyError { }
+    }
+    
+    // FAIL: Caught error RecordingError.notEnoughElements
+    func testNextCountNotEnoughElementsError() throws {
+        do {
+            let publisher = PassthroughSubject<String, Never>()
+            let recorder = publisher.record()
+            publisher.send("foo")
+            publisher.send(completion: .finished)
+            _ = try wait(for: recorder.next(2), timeout: 0.1)
+            XCTFail("Expected error")
+        } catch RecordingError.notEnoughElements { }
+    }
+
     // MARK: - Prefix
     
     // SUCCESS: no timeout, no error
@@ -299,6 +349,7 @@ class DocumentationTests: FailureTestCase {
             publisher.send("foo")
             publisher.send(completion: .failure(MyError()))
             _ = try wait(for: recorder.prefix(2), timeout: 0.1)
+            XCTFail("Expected error")
         } catch is MyError { }
     }
     
@@ -336,6 +387,7 @@ class DocumentationTests: FailureTestCase {
                 publisher.send("foo")
                 publisher.send(completion: .failure(MyError()))
                 _ = try wait(for: recorder.prefix(3).inverted, timeout: 0.1)
+                XCTFail("Expected error")
             } catch is MyError { }
         }
     }
@@ -361,6 +413,7 @@ class DocumentationTests: FailureTestCase {
                 let publisher = PassthroughSubject<String, Never>()
                 let recorder = publisher.record()
                 _ = try wait(for: recorder.recording, timeout: 0.1)
+                XCTFail("Expected error")
             } catch RecordingError.notCompleted { }
         }
     }
@@ -383,6 +436,7 @@ class DocumentationTests: FailureTestCase {
                 let publisher = PassthroughSubject<String, Never>()
                 let recorder = publisher.record()
                 _ = try wait(for: recorder.single, timeout: 0.1)
+                XCTFail("Expected error")
             } catch RecordingError.notCompleted { }
         }
     }
@@ -394,6 +448,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .failure(MyError()))
             _ = try wait(for: recorder.single, timeout: 0.1)
+            XCTFail("Expected error")
         } catch is MyError { }
     }
     
@@ -406,6 +461,7 @@ class DocumentationTests: FailureTestCase {
             publisher.send("bar")
             publisher.send(completion: .finished)
             _ = try wait(for: recorder.single, timeout: 0.1)
+            XCTFail("Expected error")
         } catch RecordingError.tooManyElements { }
     }
     
@@ -416,6 +472,7 @@ class DocumentationTests: FailureTestCase {
             let recorder = publisher.record()
             publisher.send(completion: .finished)
             _ = try wait(for: recorder.single, timeout: 0.1)
+            XCTFail("Expected error")
         } catch RecordingError.notEnoughElements { }
     }
 }

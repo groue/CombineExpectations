@@ -447,7 +447,7 @@ func testArrayOfTwoElementsPublishesElementsInOrder() throws {
 func testNextTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    let element = try wait(for: recorder.next(), timeout: 0.1)
+    let element = try wait(for: recorder.next(), timeout: 1)
 }
 
 // FAIL: Caught error MyError
@@ -455,7 +455,7 @@ func testNextError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    let element = try wait(for: recorder.next(), timeout: 0.1)
+    let element = try wait(for: recorder.next(), timeout: 1)
 }
 
 // FAIL: Caught error RecordingError.notEnoughElements
@@ -463,7 +463,7 @@ func testNextNotEnoughElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send(completion: .finished)
-    let element = try wait(for: recorder.next(), timeout: 0.1)
+    let element = try wait(for: recorder.next(), timeout: 1)
 }
 ```
 
@@ -497,6 +497,40 @@ func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
     XCTAssertEqual(elements, ["baz"])
 }
 ```
+
+<details>
+    <summary>Examples of failing tests</summary>
+
+```swift    
+// FAIL: Asynchronous wait failed
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextCountTimeout() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    let elements = try wait(for: recorder.next(2), timeout: 1)
+}
+
+// FAIL: Caught error MyError
+func testNextCountError() throws {
+    let publisher = PassthroughSubject<String, MyError>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    publisher.send(completion: .failure(MyError()))
+    let elements = try wait(for: recorder.next(2), timeout: 1)
+}
+
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextCountNotEnoughElementsError() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    publisher.send(completion: .finished)
+    let elements = try wait(for: recorder.next(2), timeout: 1)
+}
+```
+
+</details>
 
 
 ---
