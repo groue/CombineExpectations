@@ -201,9 +201,12 @@ extension PublisherExpectations {
     /// The type of the publisher expectation returned by Recorder.first
     public typealias First<Input, Failure: Error> = Map<Prefix<Input, Failure>, Input?>
     
-    /// The type of the publisher expectation returned by Recorder.lastt
+    /// The type of the publisher expectation returned by Recorder.last
     public typealias Last<Input, Failure: Error> = Map<Elements<Input, Failure>, Input?>
     
+    /// The type of the publisher expectation returned by Recorder.next()
+    public typealias Next1<Input, Failure: Error> = Map<Next<Input, Failure>, Input>
+
     /// The type of the publisher expectation returned by Recorder.single
     public typealias Single<Input, Failure: Error> = Map<Elements<Input, Failure>, Input>
 }
@@ -347,10 +350,58 @@ extension Recorder {
         elements.map { $0.last }
     }
     
-    public func next() -> PublisherExpectations.Map<PublisherExpectations.Next<Input, Failure>, Input> {
+    /// Returns a publisher expectation which waits for the recorded publisher
+    /// to emit one element, or to complete.
+    ///
+    /// When waiting for this expectation, a RecordingError is thrown if the
+    /// publisher does not publish one element after last waited expectation.
+    /// The publisher error is thrown if the publisher fails before
+    /// publishing one element.
+    ///
+    /// Otherwise, the next published element is returned.
+    ///
+    /// For example:
+    ///
+    ///     // SUCCESS: no timeout, no error
+    ///     func testArrayOfTwoElementsPublishesElementsInOrder() throws {
+    ///         let publisher = ["foo", "bar"].publisher
+    ///         let recorder = publisher.record()
+    ///
+    ///         var element = try wait(for: recorder.next(), timeout: 1)
+    ///         XCTAssertEqual(element, "foo")
+    ///
+    ///         var element = try wait(for: recorder.next(), timeout: 1)
+    ///         XCTAssertEqual(element, "bar")
+    ///     }
+    public func next() -> PublisherExpectations.Next1<Input, Failure> {
         return next(1).map { $0[0] }
     }
     
+    /// Returns a publisher expectation which waits for the recorded publisher
+    /// to emit `count` elements, or to complete.
+    ///
+    /// When waiting for this expectation, a RecordingError is thrown if the
+    /// publisher does not publish `count` elements after last waited
+    /// expectation. The publisher error is thrown if the publisher fails before
+    /// publishing `count` elements.
+    ///
+    /// Otherwise, an array of exactly `count` element is returned.
+    ///
+    /// For example:
+    ///
+    ///     // SUCCESS: no timeout, no error
+    ///     func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
+    ///         let publisher = ["foo", "bar", "baz"].publisher
+    ///         let recorder = publisher.record()
+    ///
+    ///         var elements = try wait(for: recorder.next(2), timeout: 1)
+    ///         XCTAssertEqual(elements, ["foo", "bar"])
+    ///
+    ///         elements = try wait(for: recorder.next(1), timeout: 1)
+    ///         XCTAssertEqual(elements, ["baz"])
+    ///     }
+    ///
+    /// - parameter count: The number of elements.
     public func next(_ count: Int) -> PublisherExpectations.Next<Input, Failure> {
         PublisherExpectations.Next(recorder: self, count: count)
     }

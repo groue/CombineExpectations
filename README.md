@@ -20,7 +20,7 @@ CombineExpectations aims at streamlining those tests. It defines an XCTestCase m
 
 - [Usage]
 - [Installation]
-- [Publisher Expectations]: [completion], [elements], [finished], [first], [last], [prefix], [recording], [single]
+- [Publisher Expectations]: [completion], [elements], [finished], [first], [last], [next()], [next(count)], [prefix(maxLength)], [recording], [single]
 
 ---
 
@@ -106,7 +106,9 @@ There are various publisher expectations. Each one waits for a specific publishe
 - [finished]: the publisher successful completion
 - [first]: the first published element
 - [last]: the last published element
-- [prefix]: the first N published elements
+- [next()]: the next published elements
+- [next(count)]: the next N published elements
+- [prefix(maxLength)]: the first N published elements
 - [recording]: the full recording of publisher events
 - [single]: the one and only published element
 - [Inverted Expectations]
@@ -163,7 +165,7 @@ func testCompletionTimeout() throws {
 
 :white_check_mark: Otherwise, an array of published elements is returned.
 
-:arrow_right: Related expectations: [last], [prefix], [recording], [single].
+:arrow_right: Related expectations: [last], [prefix(maxLength)], [recording], [single].
 
 Example:
 
@@ -282,7 +284,7 @@ func testInvertedFinishedError() throws {
 
 :white_check_mark: Otherwise, the first published element is returned, or nil if the publisher completes before it publishes any element.
 
-:arrow_right: Related expectations: [last], [prefix], [single].
+:arrow_right: Related expectations: [last], [next()], [prefix(maxLength)], [single].
 
 Example:
 
@@ -410,7 +412,65 @@ func testLastError() throws {
 
 ---
 
-### prefix
+### next()
+
+:clock230: `recorder.next()` waits for the recorded publisher to emit one element, or to complete.
+
+:x: When waiting for this expectation, a `RecordingError` is thrown if the publisher does not publish one element after last waited expectation. The publisher error is thrown if the publisher fails before publishing one element.
+
+:white_check_mark: Otherwise, the next published element is returned.
+
+:arrow_right: Related expectations: [first], [next(count)].
+
+Example:
+
+```swift
+// SUCCESS: no timeout, no error
+func testArrayOfTwoElementsPublishesElementsInOrder() throws {
+    let publisher = ["foo", "bar"].publisher
+    let recorder = publisher.record()
+
+    var element = try wait(for: recorder.next(), timeout: 1)
+    XCTAssertEqual(element, "foo")
+
+    var element = try wait(for: recorder.next(), timeout: 1)
+    XCTAssertEqual(element, "bar")
+}
+```
+
+
+---
+
+### next(count)
+
+:clock230: `recorder.next(count)` waits for the recorded publisher to emit `count` elements, or to complete.
+
+:x: When waiting for this expectation, a `RecordingError` is thrown if the publisher does not publish `count` elements after last waited expectation. The publisher error is thrown if the publisher fails before publishing `count` elements.
+
+:white_check_mark: Otherwise, an array of exactly `count` element is returned.
+
+:arrow_right: Related expectations: [next()], [prefix(maxLength)].
+
+Example:
+
+```swift
+// SUCCESS: no timeout, no error
+func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
+    let publisher = ["foo", "bar", "baz"].publisher
+    let recorder = publisher.record()
+
+    var elements = try wait(for: recorder.next(2), timeout: 1)
+    XCTAssertEqual(elements, ["foo", "bar"])
+
+    elements = try wait(for: recorder.next(1), timeout: 1)
+    XCTAssertEqual(elements, ["baz"])
+}
+```
+
+
+---
+
+### prefix(maxLength)
 
 :clock230: `recorder.prefix(maxLength)` waits for the recorded publisher to emit `maxLength` elements, or to complete.
 
@@ -418,7 +478,7 @@ func testLastError() throws {
 
 :white_check_mark: Otherwise, an array of received elements is returned, containing at most `maxLength` elements, or less if the publisher completes early.
 
-:arrow_right: Related expectations: [elements], [first].
+:arrow_right: Related expectations: [elements], [first], [next(count)].
 
 Example:
 
@@ -611,7 +671,7 @@ func testSingleNoElementsError() throws {
 
 ### Inverted Expectations
 
-Some expectations can be inverted ([finished], [first], [prefix]). An inverted expectation fails if the base expectation fulfills within the specified timeout.
+Some expectations can be inverted ([finished], [first], [prefix(maxLength)]). An inverted expectation fails if the base expectation fulfills within the specified timeout.
 
 When waiting for an inverted expectation, you receive the same result and eventual error as the base expectation.
 
@@ -631,8 +691,10 @@ func testPassthroughSubjectDoesNotFinish() throws {
 [Installation]: #installation
 [Publisher Expectations]: #publisher-expectations
 [finished]: #finished
-[prefix]: #prefix
+[prefix(maxLength)]: #prefixmaxlength
 [first]: #first
+[next()]: #next
+[next(count)]: #nextcount
 [recording]: #recording
 [completion]: #completion
 [elements]: #elements
