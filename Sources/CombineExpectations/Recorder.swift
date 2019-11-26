@@ -66,7 +66,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     
     // MARK: - PublisherExpectation API
     
-    func fulfillOnInput(_ expectation: XCTestExpectation) {
+    func fulfillOnInput(_ expectation: XCTestExpectation, includingConsumed: Bool) {
         synchronized {
             switch state {
             case let .waitingForSubscription(expectations):
@@ -75,7 +75,12 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 state = .waitingForSubscription(expectations)
                 
             case let .subscribed(subscription, expectations, elements):
-                let fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
+                let fulfillmentCount: Int
+                if includingConsumed {
+                    fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
+                } else {
+                    fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count - consumedCount)
+                }
                 expectation.fulfill(count: fulfillmentCount)
                 
                 let remainingCount = expectation.expectedFulfillmentCount - fulfillmentCount

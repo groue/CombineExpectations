@@ -41,7 +41,7 @@ extension PublisherExpectations {
                 expectation.fulfill()
             } else {
                 expectation.expectedFulfillmentCount = count
-                recorder.fulfillOnInput(expectation)
+                recorder.fulfillOnInput(expectation, includingConsumed: false)
             }
         }
         

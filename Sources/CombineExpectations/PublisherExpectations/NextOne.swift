@@ -28,7 +28,7 @@ extension PublisherExpectations {
         let recorder: Recorder<Input, Failure>
         
         public func setup(_ expectation: XCTestExpectation) {
-            recorder.fulfillOnInput(expectation)
+            recorder.fulfillOnInput(expectation, includingConsumed: false)
         }
         
         public func expectedValue() throws -> Input? {
@@ -56,7 +56,7 @@ extension PublisherExpectations {
         
         public func setup(_ expectation: XCTestExpectation) {
             expectation.isInverted = true
-            recorder.fulfillOnInput(expectation)
+            recorder.fulfillOnInput(expectation, includingConsumed: false)
         }
         
         public func expectedValue() throws {
