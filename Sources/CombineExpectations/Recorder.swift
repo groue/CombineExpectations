@@ -19,6 +19,15 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     private enum RecorderExpectation {
         case onInput(XCTestExpectation, remainingCount: Int)
         case onCompletion(XCTestExpectation)
+        
+        var expectation: XCTestExpectation {
+            switch self {
+            case let .onCompletion(expectation):
+                return expectation
+            case let .onInput(expectation, remainingCount: _):
+                return expectation
+            }
+        }
     }
     
     private enum State {
@@ -70,12 +79,12 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         synchronized {
             switch state {
             case let .waitingForSubscription(exp):
-                precondition(exp == nil, "Already waiting for an expectation")
+                preconditionNotWaiting(for: exp)
                 let exp = RecorderExpectation.onInput(expectation, remainingCount: expectation.expectedFulfillmentCount)
                 state = .waitingForSubscription(exp)
                 
             case let .subscribed(subscription, exp, elements):
-                precondition(exp == nil, "Already waiting for an expectation")
+                preconditionNotWaiting(for: exp)
                 let fulfillmentCount: Int
                 if includingConsumed {
                     fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
@@ -100,12 +109,12 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         synchronized {
             switch state {
             case let .waitingForSubscription(exp):
-                precondition(exp == nil, "Already waiting for an expectation")
+                preconditionNotWaiting(for: exp)
                 let exp = RecorderExpectation.onCompletion(expectation)
                 state = .waitingForSubscription(exp)
                 
             case let .subscribed(subscription, exp, elements):
-                precondition(exp == nil, "Already waiting for an expectation")
+                preconditionNotWaiting(for: exp)
                 let exp = RecorderExpectation.onCompletion(expectation)
                 state = .subscribed(subscription, exp, elements)
                 
@@ -140,6 +149,19 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 precondition(count <= remainingElements.count)
                 consumedCount += count
             })
+        }
+    }
+    
+    // Recorder can fulfill a single expectation. When it is asked to fulfill
+    // another one, we have to check for programmer errors.
+    private func preconditionNotWaiting(for recorderExpectation: RecorderExpectation?) {
+        if let exp = recorderExpectation {
+            // We are already waiting for an expectation! Is it a programmer
+            // error? Recorder drops references to non-inverted expectations
+            // when they are fulfilled. But inverted expectations are not
+            // fulfilled, and thus not dropped. We can't quite know if an
+            // inverted expectations has expired yet, so just let it go.
+            precondition(exp.expectation.isInverted, "Already waiting for an expectation")
         }
     }
     

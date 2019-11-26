@@ -387,6 +387,12 @@ class RecorderTests: XCTestCase {
             let recorder = publisher.record()
             try wait(for: recorder.next().inverted, timeout: 0.01)
         }
+        do {
+            let publisher = Timer.publish(every: 0.2, on: .main, in: .default).autoconnect()
+            let recorder = publisher.record()
+            try wait(for: recorder.next().inverted, timeout: 0.1)
+            _ = try wait(for: recorder.next(), timeout: 0.15)
+        }
     }
     
     func testNextNext() throws {
@@ -409,8 +415,8 @@ class RecorderTests: XCTestCase {
         do {
             let publisher = Timer.publish(every: 0.1, on: .main, in: .default).autoconnect()
             let recorder = publisher.record()
-            _ = try wait(for: recorder.next(), timeout: 1)
-            _ = try wait(for: recorder.next(), timeout: 1)
+            _ = try wait(for: recorder.next(), timeout: 0.15)
+            _ = try wait(for: recorder.next(), timeout: 0.15)
         }
     }
     
@@ -668,6 +674,12 @@ class RecorderTests: XCTestCase {
             publisher.send(2)
             publisher.send(3)
             try XCTAssertEqual(wait(for: recorder.next(2), timeout: 1), [2, 3])
+        }
+        do {
+            let publisher = Timer.publish(every: 0.1, on: .main, in: .default).autoconnect()
+            let recorder = publisher.record()
+            _ = try wait(for: recorder.next(2), timeout: 0.25)
+            _ = try wait(for: recorder.next(2), timeout: 0.25)
         }
     }
     
@@ -1390,6 +1402,13 @@ class RecorderTests: XCTestCase {
             let publisher = Empty<Int, Never>().delay(for: 0.1, scheduler: DispatchQueue.main)
             let recorder = publisher.record()
             try wait(for: recorder.finished.inverted, timeout: 0.01)
+        }
+        do {
+            let publisher = PassthroughSubject<Int, Never>()
+            let recorder = publisher.record()
+            try wait(for: recorder.finished.inverted, timeout: 0.01)
+            publisher.send(completion: .finished)
+            try wait(for: recorder.finished, timeout: 0.01)
         }
     }
     
