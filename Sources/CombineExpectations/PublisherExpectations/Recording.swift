@@ -31,9 +31,9 @@ extension PublisherExpectations {
         }
         
         public func expectedValue() throws -> Record<Input, Failure>.Recording {
-            try recorder.expectationValue { (elements, completion, remaining, consume) in
+            try recorder.value { (elements, completion, remainingElements, consume) in
                 if let completion = completion {
-                    consume(remaining.count)
+                    consume(remainingElements.count)
                     return Record<Input, Failure>.Recording(output: elements, completion: completion)
                 } else {
                     throw RecordingError.notCompleted

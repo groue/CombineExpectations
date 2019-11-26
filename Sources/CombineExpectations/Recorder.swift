@@ -115,19 +115,29 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         }
     }
     
-    func expectationValue<T>(_ value: (
+    /// Returns a value based on the recorded state of the publisher.
+    ///
+    /// - parameter value: A function which returns the value, given the
+    ///   recorded state of the publisher.
+    /// - parameter elements: All recorded elements.
+    /// - parameter completion: The eventual publisher completion.
+    /// - parameter remainingElements: The elements that were not consumed yet.
+    /// - parameter consume: A function which consumes elements.
+    /// - parameter count: The number of consumed elements.
+    /// - returns: The value
+    func value<T>(_ value: (
         _ elements: [Input],
         _ completion: Subscribers.Completion<Failure>?,
-        _ remaining: ArraySlice<Input>,
-        _ consume: (Int) -> ()) throws -> T)
+        _ remainingElements: ArraySlice<Input>,
+        _ consume: (_ count: Int) -> ()) throws -> T)
         rethrows -> T
     {
         try synchronized {
             let (elements, completion) = state.elementsAndCompletion
-            let remaining = elements[consumedCount...]
-            return try value(elements, completion, remaining, { count in
+            let remainingElements = elements[consumedCount...]
+            return try value(elements, completion, remainingElements, { count in
                 precondition(count >= 0)
-                precondition(count <= remaining.count)
+                precondition(count <= remainingElements.count)
                 consumedCount += count
             })
         }

@@ -48,9 +48,9 @@ extension PublisherExpectations {
         }
         
         public func expectedValue() throws {
-            try recorder.expectationValue { (_, completion, remaining, consume) in
+            try recorder.value { (_, completion, remainingElements, consume) in
                 guard let completion = completion else {
-                    consume(remaining.count)
+                    consume(remainingElements.count)
                     return
                 }
                 if case let .failure(error) = completion {

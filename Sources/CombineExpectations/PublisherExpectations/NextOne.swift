@@ -32,8 +32,8 @@ extension PublisherExpectations {
         }
         
         public func expectedValue() throws -> Input? {
-            try recorder.expectationValue { (_, completion, remaining, consume) in
-                if let next = remaining.first {
+            try recorder.value { (_, completion, remainingElements, consume) in
+                if let next = remainingElements.first {
                     consume(1)
                     return next
                 }
@@ -51,6 +51,7 @@ extension PublisherExpectations {
         }
     }
     
+    /// TODO
     public struct NextOneInverted<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
@@ -60,8 +61,8 @@ extension PublisherExpectations {
         }
         
         public func expectedValue() throws {
-            try recorder.expectationValue { (_, completion, remaining, consume) in
-                if remaining.isEmpty == false {
+            try recorder.value { (_, completion, remainingElements, consume) in
+                if remainingElements.isEmpty == false {
                     return
                 }
                 if case let .failure(error) = completion {

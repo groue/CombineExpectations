@@ -46,10 +46,10 @@ extension PublisherExpectations {
         }
         
         public func expectedValue() throws -> [Input] {
-            try recorder.expectationValue { (_, completion, remaining, consume) in
-                if remaining.count >= count {
+            try recorder.value { (_, completion, remainingElements, consume) in
+                if remainingElements.count >= count {
                     consume(count)
-                    return Array(remaining.prefix(count))
+                    return Array(remainingElements.prefix(count))
                 }
                 if case let .failure(error) = completion {
                     throw error

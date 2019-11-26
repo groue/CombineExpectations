@@ -39,9 +39,9 @@ extension PublisherExpectations {
         }
         
         public func expectedValue() throws -> Input? {
-            try recorder.expectationValue { (elements, completion, remaining, consume) in
+            try recorder.value { (elements, completion, remainingElements, consume) in
                 if let first = elements.first {
-                    let extraCount = max(1 + remaining.count - elements.count, 0)
+                    let extraCount = max(1 + remainingElements.count - elements.count, 0)
                     consume(extraCount)
                     return first
                 }
@@ -100,7 +100,7 @@ extension PublisherExpectations {
         }
         
         public func expectedValue() throws {
-            try recorder.expectationValue { (elements, completion, _, _) in
+            try recorder.value { (elements, completion, _, _) in
                 if elements.first == nil, case let .failure(error) = completion {
                     throw error
                 }
