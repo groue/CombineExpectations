@@ -27,11 +27,11 @@ extension PublisherExpectations {
     public struct NextOne<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             recorder.fulfillOnInput(expectation)
         }
         
-        public func _value() throws -> Input? {
+        public func expectedValue() throws -> Input? {
             try recorder.expectationValue { (_, completion, remaining, consume) in
                 if let next = remaining.first {
                     consume(1)
@@ -54,12 +54,12 @@ extension PublisherExpectations {
     public struct NextOneInverted<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             expectation.isInverted = true
             recorder.fulfillOnInput(expectation)
         }
         
-        public func _value() throws {
+        public func expectedValue() throws {
             try recorder.expectationValue { (_, completion, remaining, consume) in
                 if remaining.isEmpty == false {
                     return

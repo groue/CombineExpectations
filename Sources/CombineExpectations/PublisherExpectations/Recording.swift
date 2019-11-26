@@ -26,11 +26,11 @@ extension PublisherExpectations {
     public struct Recording<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             recorder.fulfillOnCompletion(expectation)
         }
         
-        public func _value() throws -> Record<Input, Failure>.Recording {
+        public func expectedValue() throws -> Record<Input, Failure>.Recording {
             try recorder.expectationValue { (elements, completion, remaining, consume) in
                 if let completion = completion {
                     consume(remaining.count)

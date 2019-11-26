@@ -41,7 +41,7 @@ extension PublisherExpectations {
             self.maxLength = maxLength
         }
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             if maxLength == 0 {
                 // Such an expectation is immediately fulfilled, by essence.
                 expectation.expectedFulfillmentCount = 1
@@ -52,7 +52,7 @@ extension PublisherExpectations {
             }
         }
         
-        public func _value() throws -> [Input] {
+        public func expectedValue() throws -> [Input] {
             try recorder.expectationValue { (elements, completion, remaining, consume) in
                 if elements.count >= maxLength {
                     let extraCount = max(maxLength + remaining.count - elements.count, 0)

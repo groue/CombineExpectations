@@ -34,7 +34,7 @@ extension PublisherExpectations {
             self.count = count
         }
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             if count == 0 {
                 // Such an expectation is immediately fulfilled, by essence.
                 expectation.expectedFulfillmentCount = 1
@@ -45,7 +45,7 @@ extension PublisherExpectations {
             }
         }
         
-        public func _value() throws -> [Input] {
+        public func expectedValue() throws -> [Input] {
             try recorder.expectationValue { (_, completion, remaining, consume) in
                 if remaining.count >= count {
                     consume(count)

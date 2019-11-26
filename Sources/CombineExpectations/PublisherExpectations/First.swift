@@ -34,11 +34,11 @@ extension PublisherExpectations {
     public struct First<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             recorder.fulfillOnInput(expectation)
         }
         
-        public func _value() throws -> Input? {
+        public func expectedValue() throws -> Input? {
             try recorder.expectationValue { (elements, completion, remaining, consume) in
                 if let first = elements.first {
                     let extraCount = max(1 + remaining.count - elements.count, 0)
@@ -94,12 +94,12 @@ extension PublisherExpectations {
     public struct FirstInverted<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             expectation.isInverted = true
             recorder.fulfillOnInput(expectation)
         }
         
-        public func _value() throws {
+        public func expectedValue() throws {
             try recorder.expectationValue { (elements, completion, _, _) in
                 if elements.first == nil, case let .failure(error) = completion {
                     throw error
