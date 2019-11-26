@@ -106,10 +106,5 @@ extension PublisherExpectations {
                 }
             }
         }
-        
-        /// :nodoc:
-        public var inverted: First<Input, Failure> {
-            return First(recorder: recorder)
-        }
     }
 }

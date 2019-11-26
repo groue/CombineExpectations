@@ -25,10 +25,5 @@ extension PublisherExpectations {
         public func expectedValue() throws -> Base.Output {
             try base.expectedValue()
         }
-        
-        /// :nodoc:
-        var inverted: Base {
-            return base
-        }
     }
 }

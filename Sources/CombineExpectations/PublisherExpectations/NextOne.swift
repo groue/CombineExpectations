@@ -100,10 +100,5 @@ extension PublisherExpectations {
                 }
             }
         }
-        
-        /// :nodoc:
-        public var inverted: NextOne<Input, Failure> {
-            return NextOne(recorder: recorder)
-        }
     }
 }
