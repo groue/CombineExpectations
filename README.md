@@ -429,11 +429,11 @@ Example:
 func testArrayOfTwoElementsPublishesElementsInOrder() throws {
     let publisher = ["foo", "bar"].publisher
     let recorder = publisher.record()
-
+    
     var element = try wait(for: recorder.next(), timeout: 1)
     XCTAssertEqual(element, "foo")
-
-    var element = try wait(for: recorder.next(), timeout: 1)
+    
+    element = try wait(for: recorder.next(), timeout: 1)
     XCTAssertEqual(element, "bar")
 }
 ```

@@ -211,6 +211,34 @@ class DocumentationTests: FailureTestCase {
         } catch is MyError { }
     }
     
+    // MARK: - next()
+    
+    // SUCCESS: no timeout, no error
+    func testArrayOfTwoElementsPublishesElementsInOrder() throws {
+        let publisher = ["foo", "bar"].publisher
+        let recorder = publisher.record()
+        
+        var element = try wait(for: recorder.next(), timeout: 1)
+        XCTAssertEqual(element, "foo")
+        
+        element = try wait(for: recorder.next(), timeout: 1)
+        XCTAssertEqual(element, "bar")
+    }
+    
+    // MARK: - next(count)
+    
+    // SUCCESS: no timeout, no error
+    func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+        
+        var elements = try wait(for: recorder.next(2), timeout: 1)
+        XCTAssertEqual(elements, ["foo", "bar"])
+        
+        elements = try wait(for: recorder.next(1), timeout: 1)
+        XCTAssertEqual(elements, ["baz"])
+    }
+    
     // MARK: - Prefix
     
     // SUCCESS: no timeout, no error

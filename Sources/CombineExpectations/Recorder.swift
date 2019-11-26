@@ -206,7 +206,7 @@ extension PublisherExpectations {
     
     /// The type of the publisher expectation returned by Recorder.next()
     public typealias Next1<Input, Failure: Error> = Map<Next<Input, Failure>, Input>
-
+    
     /// The type of the publisher expectation returned by Recorder.single
     public typealias Single<Input, Failure: Error> = Map<Elements<Input, Failure>, Input>
 }
@@ -370,7 +370,7 @@ extension Recorder {
     ///         var element = try wait(for: recorder.next(), timeout: 1)
     ///         XCTAssertEqual(element, "foo")
     ///
-    ///         var element = try wait(for: recorder.next(), timeout: 1)
+    ///         element = try wait(for: recorder.next(), timeout: 1)
     ///         XCTAssertEqual(element, "bar")
     ///     }
     public func next() -> PublisherExpectations.Next1<Input, Failure> {
