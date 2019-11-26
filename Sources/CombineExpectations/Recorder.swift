@@ -16,14 +16,14 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public typealias Input = Input
     public typealias Failure = Failure
     
-    private enum Fulfillment {
+    private enum RecorderExpectation {
         case onInput(XCTestExpectation, remainingCount: Int)
         case onCompletion(XCTestExpectation)
     }
     
     private enum State {
-        case waitingForSubscription(Fulfillment?)
-        case subscribed(Subscription, Fulfillment?, [Input])
+        case waitingForSubscription(RecorderExpectation?)
+        case subscribed(Subscription, RecorderExpectation?, [Input])
         case completed([Input], Subscribers.Completion<Failure>)
         
         var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
@@ -69,18 +69,13 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     func fulfillOnInput(_ expectation: XCTestExpectation, includingConsumed: Bool) {
         synchronized {
             switch state {
-            case let .waitingForSubscription(fulfillment):
-                if fulfillment != nil {
-                    XCTFail("Already waiting for an expectation")
-                    return
-                }
-                state = .waitingForSubscription(.onInput(expectation, remainingCount: expectation.expectedFulfillmentCount))
+            case let .waitingForSubscription(exp):
+                precondition(exp == nil, "Already waiting for an expectation")
+                let exp = RecorderExpectation.onInput(expectation, remainingCount: expectation.expectedFulfillmentCount)
+                state = .waitingForSubscription(exp)
                 
-            case let .subscribed(subscription, fulfillment, elements):
-                if fulfillment != nil {
-                    XCTFail("Already waiting for an expectation")
-                    return
-                }
+            case let .subscribed(subscription, exp, elements):
+                precondition(exp == nil, "Already waiting for an expectation")
                 let fulfillmentCount: Int
                 if includingConsumed {
                     fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
@@ -91,7 +86,8 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 
                 let remainingCount = expectation.expectedFulfillmentCount - fulfillmentCount
                 if remainingCount > 0 {
-                    state = .subscribed(subscription, .onInput(expectation, remainingCount: remainingCount), elements)
+                    let exp = RecorderExpectation.onInput(expectation, remainingCount: remainingCount)
+                    state = .subscribed(subscription, exp, elements)
                 }
                 
             case .completed:
@@ -103,19 +99,15 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     func fulfillOnCompletion(_ expectation: XCTestExpectation) {
         synchronized {
             switch state {
-            case let .waitingForSubscription(fulfillment):
-                if fulfillment != nil {
-                    XCTFail("Already waiting for an expectation")
-                    return
-                }
-                state = .waitingForSubscription(.onCompletion(expectation))
+            case let .waitingForSubscription(exp):
+                precondition(exp == nil, "Already waiting for an expectation")
+                let exp = RecorderExpectation.onCompletion(expectation)
+                state = .waitingForSubscription(exp)
                 
-            case let .subscribed(subscription, fulfillment, elements):
-                if fulfillment != nil {
-                    XCTFail("Already waiting for an expectation")
-                    return
-                }
-                state = .subscribed(subscription, .onCompletion(expectation), elements)
+            case let .subscribed(subscription, exp, elements):
+                precondition(exp == nil, "Already waiting for an expectation")
+                let exp = RecorderExpectation.onCompletion(expectation)
+                state = .subscribed(subscription, exp, elements)
                 
             case .completed:
                 expectation.fulfill()
@@ -123,7 +115,13 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         }
     }
     
-    func expectationValue<T>(_ value: (_ elements: [Input], _ completion: Subscribers.Completion<Failure>?, _ remaining: ArraySlice<Input>, _ consume: (Int) -> ()) throws -> T) rethrows -> T {
+    func expectationValue<T>(_ value: (
+        _ elements: [Input],
+        _ completion: Subscribers.Completion<Failure>?,
+        _ remaining: ArraySlice<Input>,
+        _ consume: (Int) -> ()) throws -> T)
+        rethrows -> T
+    {
         try synchronized {
             let (elements, completion) = state.elementsAndCompletion
             let remaining = elements[consumedCount...]
@@ -140,8 +138,8 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(subscription: Subscription) {
         synchronized {
             switch state {
-            case let .waitingForSubscription(expectations):
-                state = .subscribed(subscription, expectations, [])
+            case let .waitingForSubscription(exp):
+                state = .subscribed(subscription, exp, [])
             default:
                 XCTFail("Publisher recorder is already subscribed")
             }
@@ -152,20 +150,21 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(_ input: Input) -> Subscribers.Demand {
         return synchronized {
             switch state {
-            case let .subscribed(subscription, fulfillment, elements):
+            case let .subscribed(subscription, exp, elements):
                 var elements = elements
                 elements.append(input)
                 
-                if case let .onInput(expectation, remainingCount: remainingCount) = fulfillment {
+                if case let .onInput(expectation, remainingCount: remainingCount) = exp {
                     assert(remainingCount > 0)
                     expectation.fulfill()
                     if remainingCount > 1 {
-                        state = .subscribed(subscription, .onInput(expectation, remainingCount: remainingCount - 1), elements)
+                        let exp = RecorderExpectation.onInput(expectation, remainingCount: remainingCount - 1)
+                        state = .subscribed(subscription, exp, elements)
                     } else {
                         state = .subscribed(subscription, nil, elements)
                     }
                 } else {
-                    state = .subscribed(subscription, fulfillment, elements)
+                    state = .subscribed(subscription, exp, elements)
                 }
                 
                 return .unlimited
@@ -184,9 +183,9 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(completion: Subscribers.Completion<Failure>) {
         synchronized {
             switch state {
-            case let .subscribed(_, fulfillment, elements):
-                if let fulfillment = fulfillment {
-                    switch fulfillment {
+            case let .subscribed(_, exp, elements):
+                if let exp = exp {
+                    switch exp {
                     case let .onCompletion(expectation):
                         expectation.fulfill()
                     case let .onInput(expectation, remainingCount: remainingCount):
@@ -199,7 +198,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 XCTFail("Publisher recorder got unexpected completion before subscription: \(String(describing: completion))")
                 
             case .completed:
-                XCTFail("Publisher is already completed")
+                XCTFail("Publisher recorder got unexpected completion after completion: \(String(describing: completion))")
             }
         }
     }
