@@ -72,8 +72,8 @@ extension PublisherExpectations {
         ///         let elements = try wait(for: recorder.prefix(3).inverted, timeout: 1)
         ///         XCTAssertEqual(elements, ["foo", "bar"])
         ///     }
-        public var inverted: Inverted<Self> {
-            return Inverted(base: self)
+        public var inverted: FirstInverted<Input, Failure> {
+            return FirstInverted(recorder: recorder)
         }
     }
     
