@@ -24,32 +24,18 @@ extension PublisherExpectations {
     ///         elements = try wait(for: recorder.next(1), timeout: 1)
     ///         XCTAssertEqual(elements, ["baz"])
     ///     }
-    public struct Next<Input, Failure: Error>: PublisherExpectation {
+    public struct NextOne<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
-        let count: Int
-        
-        init(recorder: Recorder<Input, Failure>, count: Int) {
-            precondition(count >= 0, "Can't take a prefix of negative length")
-            self.recorder = recorder
-            self.count = count
-        }
         
         public func _setup(_ expectation: XCTestExpectation) {
-            if count == 0 {
-                // Such an expectation is immediately fulfilled, by essence.
-                expectation.expectedFulfillmentCount = 1
-                expectation.fulfill()
-            } else {
-                expectation.expectedFulfillmentCount = count
-                recorder.fulfillOnInput(expectation)
-            }
+            recorder.fulfillOnInput(expectation)
         }
         
-        public func _value() throws -> [Input] {
+        public func _value() throws -> Input? {
             try recorder.expectationValue { (_, completion, remaining, consume) in
-                if remaining.count >= count {
-                    consume(count)
-                    return Array(remaining.prefix(count))
+                if let next = remaining.first {
+                    consume(1)
+                    return next
                 }
                 if case let .failure(error) = completion {
                     throw error
@@ -57,6 +43,36 @@ extension PublisherExpectations {
                     throw RecordingError.notEnoughElements
                 }
             }
+        }
+        
+        /// TODO
+        public var inverted: NextOneInverted<Input, Failure> {
+            return NextOneInverted(recorder: recorder)
+        }
+    }
+    
+    public struct NextOneInverted<Input, Failure: Error>: PublisherExpectation {
+        let recorder: Recorder<Input, Failure>
+        
+        public func _setup(_ expectation: XCTestExpectation) {
+            expectation.isInverted = true
+            recorder.fulfillOnInput(expectation)
+        }
+        
+        public func _value() throws {
+            try recorder.expectationValue { (_, completion, remaining, consume) in
+                if remaining.isEmpty == false {
+                    return
+                }
+                if case let .failure(error) = completion {
+                    throw error
+                }
+            }
+        }
+        
+        /// :nodoc:
+        public var inverted: NextOne<Input, Failure> {
+            return NextOne(recorder: recorder)
         }
     }
 }

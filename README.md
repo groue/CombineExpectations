@@ -330,7 +330,7 @@ This publisher expectation can be [inverted]:
 func testPassthroughSubjectDoesNotPublishAnyElement() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    _ = try wait(for: recorder.first.inverted, timeout: 1)
+    try wait(for: recorder.first.inverted, timeout: 1)
 }
 ```
 
@@ -343,7 +343,7 @@ func testInvertedFirstTooEarly() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send("foo")
-    _ = try wait(for: recorder.first.inverted, timeout: 1)
+    try wait(for: recorder.first.inverted, timeout: 1)
 }
     
 // FAIL: Fulfilled inverted expectation
@@ -352,7 +352,7 @@ func testInvertedFirstError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    _ = try wait(for: recorder.first.inverted, timeout: 1)
+    try wait(for: recorder.first.inverted, timeout: 1)
 }
 ```
 

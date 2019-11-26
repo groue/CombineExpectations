@@ -156,7 +156,7 @@ class DocumentationTests: FailureTestCase {
     func testPassthroughSubjectDoesNotPublishAnyElement() throws {
         let publisher = PassthroughSubject<String, Never>()
         let recorder = publisher.record()
-        _ = try wait(for: recorder.first.inverted, timeout: 0.1)
+        try wait(for: recorder.first.inverted, timeout: 0.1)
     }
     
     // FAIL: Fulfilled inverted expectation
@@ -165,7 +165,7 @@ class DocumentationTests: FailureTestCase {
             let publisher = PassthroughSubject<String, Never>()
             let recorder = publisher.record()
             publisher.send("foo")
-            _ = try wait(for: recorder.first.inverted, timeout: 0.1)
+            try wait(for: recorder.first.inverted, timeout: 0.1)
         }
     }
     
@@ -177,7 +177,7 @@ class DocumentationTests: FailureTestCase {
                 let publisher = PassthroughSubject<String, MyError>()
                 let recorder = publisher.record()
                 publisher.send(completion: .failure(MyError()))
-                _ = try wait(for: recorder.first.inverted, timeout: 0.1)
+                try wait(for: recorder.first.inverted, timeout: 0.1)
                 XCTFail("Expected error")
             } catch is MyError { }
         }

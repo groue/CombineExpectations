@@ -2,11 +2,14 @@ import Combine
 import XCTest
 
 extension PublisherExpectations {
-    /// A publisher expectation which waits for a publisher to
-    /// complete successfully.
+    /// A publisher expectation which waits for the recorded publisher
+    /// to complete.
     ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// does not complete on time.
+    /// When waiting for this expectation, a RecordingError.notCompleted is
+    /// thrown if the publisher does not complete on time.
+    ///
+    /// Otherwise, a [Record.Recording](https://developer.apple.com/documentation/combine/record/recording)
+    /// is returned.
     ///
     /// For example:
     ///

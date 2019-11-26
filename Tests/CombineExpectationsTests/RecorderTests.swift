@@ -381,6 +381,14 @@ class RecorderTests: XCTestCase {
         }
     }
     
+    func testWaitForNextInverted() throws {
+        do {
+            let publisher = Empty<Int, Never>().delay(for: 0.1, scheduler: DispatchQueue.main)
+            let recorder = publisher.record()
+            try wait(for: recorder.next().inverted, timeout: 0.01)
+        }
+    }
+    
     func testNextNext() throws {
         do {
             let publisher = PassthroughSubject<Int, Never>()
@@ -1115,8 +1123,7 @@ class RecorderTests: XCTestCase {
         do {
             let publisher = Empty<Int, Never>().delay(for: 0.1, scheduler: DispatchQueue.main)
             let recorder = publisher.record()
-            let element = try wait(for: recorder.first.inverted, timeout: 0.01)
-            XCTAssertNil(element)
+            try wait(for: recorder.first.inverted, timeout: 0.01)
         }
     }
     

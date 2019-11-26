@@ -18,8 +18,6 @@ extension PublisherExpectations {
     }
 }
 
-extension PublisherExpectations.Map: InvertablePublisherExpectation where Base: InvertablePublisherExpectation { }
-
 extension PublisherExpectation {
     /// Returns a publisher expectation that transforms the value of the
     /// base expectation.

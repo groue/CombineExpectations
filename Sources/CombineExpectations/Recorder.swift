@@ -198,14 +198,8 @@ extension PublisherExpectations {
     /// The type of the publisher expectation returned by Recorder.elements
     public typealias Elements<Input, Failure: Error> = Map<Recording<Input, Failure>, [Input]>
     
-    /// The type of the publisher expectation returned by Recorder.first
-    public typealias First<Input, Failure: Error> = Map<Prefix<Input, Failure>, Input?>
-    
     /// The type of the publisher expectation returned by Recorder.last
     public typealias Last<Input, Failure: Error> = Map<Elements<Input, Failure>, Input?>
-    
-    /// The type of the publisher expectation returned by Recorder.next()
-    public typealias Next1<Input, Failure: Error> = Map<Next<Input, Failure>, Input>
     
     /// The type of the publisher expectation returned by Recorder.single
     public typealias Single<Input, Failure: Error> = Map<Elements<Input, Failure>, Input>
@@ -318,10 +312,10 @@ extension Recorder {
     ///     func testPassthroughSubjectDoesNotPublishAnyElement() throws {
     ///         let publisher = PassthroughSubject<String, Never>()
     ///         let recorder = publisher.record()
-    ///         _ = try wait(for: recorder.first.inverted, timeout: 1)
+    ///         try wait(for: recorder.first.inverted, timeout: 1)
     ///     }
     public var first: PublisherExpectations.First<Input, Failure> {
-        prefix(1).map { $0.first }
+        PublisherExpectations.First(recorder: self)
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
@@ -373,8 +367,8 @@ extension Recorder {
     ///         element = try wait(for: recorder.next(), timeout: 1)
     ///         XCTAssertEqual(element, "bar")
     ///     }
-    public func next() -> PublisherExpectations.Next1<Input, Failure> {
-        return next(1).map { $0[0] }
+    public func next() -> PublisherExpectations.NextOne<Input, Failure> {
+        PublisherExpectations.NextOne(recorder: self)
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
