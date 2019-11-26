@@ -406,6 +406,12 @@ class RecorderTests: XCTestCase {
             publisher.send(1)
             try XCTAssertEqual(wait(for: recorder.next(), timeout: 1), 1)
         }
+        do {
+            let publisher = Timer.publish(every: 0.1, on: .main, in: .default).autoconnect()
+            let recorder = publisher.record()
+            _ = try wait(for: recorder.next(), timeout: 1)
+            _ = try wait(for: recorder.next(), timeout: 1)
+        }
     }
     
     func testFirstNext() throws {
