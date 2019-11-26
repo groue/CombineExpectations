@@ -438,6 +438,37 @@ func testArrayOfTwoElementsPublishesElementsInOrder() throws {
 }
 ```
 
+<details>
+    <summary>Examples of failing tests</summary>
+
+```swift    
+// FAIL: Asynchronous wait failed
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextTimeout() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    let element = try wait(for: recorder.next(), timeout: 0.1)
+}
+
+// FAIL: Caught error MyError
+func testNextError() throws {
+    let publisher = PassthroughSubject<String, MyError>()
+    let recorder = publisher.record()
+    publisher.send(completion: .failure(MyError()))
+    let element = try wait(for: recorder.next(), timeout: 0.1)
+}
+
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextNotEnoughElementsError() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send(completion: .finished)
+    let element = try wait(for: recorder.next(), timeout: 0.1)
+}
+```
+
+</details>
+
 
 ---
 
@@ -646,7 +677,7 @@ func testSingleError() throws {
 }
     
 // FAIL: Caught error RecordingError.tooManyElements
-func testSingleMoreThanOneElementError() throws {
+func testSingleTooManyElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send("foo")
@@ -656,7 +687,7 @@ func testSingleMoreThanOneElementError() throws {
 }
     
 // FAIL: Caught error RecordingError.notEnoughElements
-func testSingleNoElementsError() throws {
+func testSingleNotEnoughElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send(completion: .finished)

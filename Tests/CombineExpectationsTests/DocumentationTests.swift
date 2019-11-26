@@ -225,6 +225,38 @@ class DocumentationTests: FailureTestCase {
         XCTAssertEqual(element, "bar")
     }
     
+    // FAIL: Asynchronous wait failed
+    // FAIL: Caught error RecordingError.notEnoughElements
+    func testNextTimeout() throws {
+        try assertFailure("Asynchronous wait failed") {
+            do {
+                let publisher = PassthroughSubject<String, Never>()
+                let recorder = publisher.record()
+                _ = try wait(for: recorder.next(), timeout: 0.1)
+            } catch RecordingError.notEnoughElements { }
+        }
+    }
+    
+    // FAIL: Caught error MyError
+    func testNextError() throws {
+        do {
+            let publisher = PassthroughSubject<String, MyError>()
+            let recorder = publisher.record()
+            publisher.send(completion: .failure(MyError()))
+            _ = try wait(for: recorder.next(), timeout: 0.1)
+        } catch is MyError { }
+    }
+    
+    // FAIL: Caught error RecordingError.notEnoughElements
+    func testNextNotEnoughElementsError() throws {
+        do {
+            let publisher = PassthroughSubject<String, Never>()
+            let recorder = publisher.record()
+            publisher.send(completion: .finished)
+            _ = try wait(for: recorder.next(), timeout: 0.1)
+        } catch RecordingError.notEnoughElements { }
+    }
+    
     // MARK: - next(count)
     
     // SUCCESS: no timeout, no error
@@ -366,7 +398,7 @@ class DocumentationTests: FailureTestCase {
     }
     
     // FAIL: Caught error RecordingError.tooManyElements
-    func testSingleMoreThanOneElementError() throws {
+    func testSingleTooManyElementsError() throws {
         do {
             let publisher = PassthroughSubject<String, Never>()
             let recorder = publisher.record()
@@ -378,7 +410,7 @@ class DocumentationTests: FailureTestCase {
     }
     
     // FAIL: Caught error RecordingError.notEnoughElements
-    func testSingleNoElementsError() throws {
+    func testSingleNotEnoughElementsError() throws {
         do {
             let publisher = PassthroughSubject<String, Never>()
             let recorder = publisher.record()
