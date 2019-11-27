@@ -117,72 +117,6 @@ class DocumentationTests: FailureTestCase {
         }
     }
     
-    // MARK: - First
-    
-    // SUCCESS: no timeout, no error
-    func testArrayOfThreeElementsPublishesItsFirstElementWithoutError() throws {
-        let publisher = ["foo", "bar", "baz"].publisher
-        let recorder = publisher.record()
-        if let element = try wait(for: recorder.first, timeout: 0.1) {
-            XCTAssertEqual(element, "foo")
-        } else {
-            XCTFail("Expected one element")
-        }
-    }
-    
-    // FAIL: Asynchronous wait failed
-    func testFirstTimeout() throws {
-        try assertFailure("Asynchronous wait failed") {
-            let publisher = PassthroughSubject<String, Never>()
-            let recorder = publisher.record()
-            _ = try wait(for: recorder.first, timeout: 0.1)
-        }
-    }
-    
-    // FAIL: Caught error MyError
-    func testFirstError() throws {
-        do {
-            let publisher = PassthroughSubject<String, MyError>()
-            let recorder = publisher.record()
-            publisher.send(completion: .failure(MyError()))
-            _ = try wait(for: recorder.first, timeout: 0.1)
-            XCTFail("Expected error")
-        } catch is MyError { }
-    }
-    
-    // MARK: - First.inverted
-    
-    // SUCCESS: no timeout, no error
-    func testPassthroughSubjectDoesNotPublishAnyElement() throws {
-        let publisher = PassthroughSubject<String, Never>()
-        let recorder = publisher.record()
-        try wait(for: recorder.first.inverted, timeout: 0.1)
-    }
-    
-    // FAIL: Fulfilled inverted expectation
-    func testInvertedFirstTooEarly() throws {
-        try assertFailure("Fulfilled inverted expectation") {
-            let publisher = PassthroughSubject<String, Never>()
-            let recorder = publisher.record()
-            publisher.send("foo")
-            try wait(for: recorder.first.inverted, timeout: 0.1)
-        }
-    }
-    
-    // FAIL: Fulfilled inverted expectation
-    // FAIL: Caught error MyError
-    func testInvertedFirstError() throws {
-        try assertFailure("Fulfilled inverted expectation") {
-            do {
-                let publisher = PassthroughSubject<String, MyError>()
-                let recorder = publisher.record()
-                publisher.send(completion: .failure(MyError()))
-                try wait(for: recorder.first.inverted, timeout: 0.1)
-                XCTFail("Expected error")
-            } catch is MyError { }
-        }
-    }
-    
     // MARK: - Last
     
     // SUCCESS: no timeout, no error
@@ -272,7 +206,7 @@ class DocumentationTests: FailureTestCase {
     // MARK: - next().inverted
     
     // SUCCESS: no timeout, no error
-    func testPassthroughSubjectDoesNotPublishAnyElement2() throws {
+    func testPassthroughSubjectDoesNotPublishAnyElement() throws {
         let publisher = PassthroughSubject<String, Never>()
         let recorder = publisher.record()
         try wait(for: recorder.next().inverted, timeout: 0.1)

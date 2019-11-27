@@ -271,11 +271,6 @@ class RecorderTests: XCTestCase {
         }
         
         do {
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        }
-        
-        do {
             let element = try wait(for: recorder.last, timeout: 1)
             XCTAssertEqual(element, 1)
         }
@@ -417,27 +412,6 @@ class RecorderTests: XCTestCase {
             let recorder = publisher.record()
             _ = try wait(for: recorder.next(), timeout: 0.15)
             _ = try wait(for: recorder.next(), timeout: 0.15)
-        }
-    }
-    
-    func testFirstNext() throws {
-        do {
-            let publisher = PassthroughSubject<Int, Never>()
-            let recorder = publisher.record()
-            publisher.send(0)
-            publisher.send(1)
-            try XCTAssertEqual(wait(for: recorder.first, timeout: 1), 0)
-            try XCTAssertEqual(wait(for: recorder.next(), timeout: 1), 1)
-            try XCTAssertEqual(wait(for: recorder.first, timeout: 1), 0)
-        }
-        do {
-            let publisher = PassthroughSubject<Int, Never>()
-            let recorder = publisher.record()
-            publisher.send(0)
-            try XCTAssertEqual(wait(for: recorder.first, timeout: 1), 0)
-            publisher.send(1)
-            try XCTAssertEqual(wait(for: recorder.next(), timeout: 1), 1)
-            try XCTAssertEqual(wait(for: recorder.first, timeout: 1), 0)
         }
     }
     
@@ -1049,100 +1023,6 @@ class RecorderTests: XCTestCase {
         try XCTAssertEqual(wait(for: recorder.prefix(1), timeout: 1), [0])
         try XCTAssertEqual(wait(for: recorder.prefix(1), timeout: 1), [0])
         try XCTAssertEqual(wait(for: recorder.prefix(2).inverted, timeout: 0.01), [0])
-    }
-    
-    // MARK: - wait(for: recorder.first)
-    
-    func testWaitForFirstSync() throws {
-        do {
-            let publisher = Empty<Int, Never>()
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertNil(element)
-        }
-        do {
-            let publisher = (0..<1).publisher
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        }
-        do {
-            let publisher = (0..<2).publisher
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        }
-    }
-    
-    func testWaitForFirstAsync() throws {
-        do {
-            let publisher = Empty<Int, Never>().receive(on: DispatchQueue.main)
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertNil(element)
-        }
-        do {
-            let publisher = (0..<1).publisher.receive(on: DispatchQueue.main)
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        }
-        do {
-            let publisher = (0..<2).publisher.receive(on: DispatchQueue.main)
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        }
-    }
-    
-    func testWaitForFirstFailure() throws {
-        do {
-            let publisher = Fail<Int, TestError>(error: TestError())
-            let recorder = publisher.record()
-            _ = try wait(for: recorder.first, timeout: 1)
-            XCTFail("Expected TestError")
-        } catch is TestError { }
-        do {
-            let publisher = (0..<1).publisher.append(error: TestError())
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        } catch is TestError { }
-        do {
-            let publisher = (0..<2).publisher.append(error: TestError())
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        } catch is TestError { }
-    }
-    
-    func testWaitForFirstFailureAsync() throws {
-        do {
-            let publisher = Fail<Int, TestError>(error: TestError()).receive(on: DispatchQueue.main)
-            let recorder = publisher.record()
-            _ = try wait(for: recorder.first, timeout: 1)
-            XCTFail("Expected TestError")
-        } catch is TestError { }
-        do {
-            let publisher = (0..<1).publisher.append(error: TestError()).receive(on: DispatchQueue.main)
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        } catch is TestError { }
-        do {
-            let publisher = (0..<2).publisher.append(error: TestError()).receive(on: DispatchQueue.main)
-            let recorder = publisher.record()
-            let element = try wait(for: recorder.first, timeout: 1)
-            XCTAssertEqual(element, 0)
-        } catch is TestError { }
-    }
-    
-    func testWaitForFirstInverted() throws {
-        do {
-            let publisher = Empty<Int, Never>().delay(for: 0.1, scheduler: DispatchQueue.main)
-            let recorder = publisher.record()
-            try wait(for: recorder.first.inverted, timeout: 0.01)
-        }
     }
     
     // MARK: - wait(for: recorder.last)
