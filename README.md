@@ -333,7 +333,7 @@ func testLastError() throws {
 
 :white_check_mark: Otherwise, the next published element is returned.
 
-:arrow_right: Related expectation: [next(count)].
+:arrow_right: Related expectations: [next(count)], [single].
 
 Example:
 
@@ -624,7 +624,7 @@ func testRecordingTimeout() throws {
 
 :white_check_mark: Otherwise, the single published element is returned.
 
-:arrow_right: Related expectations: [elements], [last].
+:arrow_right: Related expectations: [elements], [last], [next()].
 
 Example:
 
