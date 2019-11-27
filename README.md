@@ -106,7 +106,7 @@ There are various publisher expectations. Each one waits for a specific publishe
 - [finished]: the publisher successful completion
 - [first]: the first published element
 - [last]: the last published element
-- [next()]: the next published elements
+- [next()]: the next published element
 - [next(count)]: the next N published elements
 - [prefix(maxLength)]: the first N published elements
 - [recording]: the full recording of publisher events
