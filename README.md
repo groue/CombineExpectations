@@ -329,7 +329,7 @@ func testLastError() throws {
 
 :clock230: `recorder.next()` waits for the recorded publisher to emit one element, or to complete.
 
-:x: When waiting for this expectation, a `RecordingError` is thrown if the publisher does not publish one element after last waited expectation. The publisher error is thrown if the publisher fails before publishing one element.
+:x: When waiting for this expectation, a `RecordingError.notEnoughElements` is thrown if the publisher does not publish one element after last waited expectation. The publisher error is thrown if the publisher fails before publishing the next element.
 
 :white_check_mark: Otherwise, the next published element is returned.
 
@@ -424,7 +424,7 @@ func testInvertedNextError() throws {
 
 :clock230: `recorder.next(count)` waits for the recorded publisher to emit `count` elements, or to complete.
 
-:x: When waiting for this expectation, a `RecordingError` is thrown if the publisher does not publish `count` elements after last waited expectation. The publisher error is thrown if the publisher fails before publishing `count` elements.
+:x: When waiting for this expectation, a `RecordingError.notEnoughElements` is thrown if the publisher does not publish `count` elements after last waited expectation. The publisher error is thrown if the publisher fails before publishing the next `count` element.
 
 :white_check_mark: Otherwise, an array of exactly `count` element is returned.
 

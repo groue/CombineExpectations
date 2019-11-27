@@ -4,10 +4,10 @@ extension PublisherExpectations {
     /// A publisher expectation which waits for the recorded publisher to emit
     /// `count` elements, or to complete.
     ///
-    /// When waiting for this expectation, a RecordingError is thrown if the
-    /// publisher does not publish `count` elements after last waited
-    /// expectation. The publisher error is thrown if the publisher fails before
-    /// publishing `count` elements.
+    /// When waiting for this expectation, a `RecordingError.notEnoughElements`
+    /// is thrown if the publisher does not publish `count` elements after last
+    /// waited expectation. The publisher error is thrown if the publisher fails
+    /// before publishing the next `count` element.
     ///
     /// Otherwise, an array of exactly `count` element is returned.
     ///
