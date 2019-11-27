@@ -81,7 +81,7 @@ class WackySubscriberTests: FailureTestCase {
                 subscriber.receive(completion: .finished)
             }
         }
-        assertFailure("failed - Publisher is already completed") {
+        assertFailure("failed - Publisher recorder got unexpected completion after completion") {
             let publisher = DoubleCompletionPublisher(base: Just("foo"))
             _ = publisher.record()
         }

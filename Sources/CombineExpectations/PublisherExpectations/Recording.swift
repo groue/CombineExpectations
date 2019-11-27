@@ -2,11 +2,14 @@ import Combine
 import XCTest
 
 extension PublisherExpectations {
-    /// A publisher expectation which waits for a publisher to
-    /// complete successfully.
+    /// A publisher expectation which waits for the recorded publisher
+    /// to complete.
     ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// does not complete on time.
+    /// When waiting for this expectation, a RecordingError.notCompleted is
+    /// thrown if the publisher does not complete on time.
+    ///
+    /// Otherwise, a [Record.Recording](https://developer.apple.com/documentation/combine/record/recording)
+    /// is returned.
     ///
     /// For example:
     ///
@@ -23,16 +26,18 @@ extension PublisherExpectations {
     public struct Recording<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             recorder.fulfillOnCompletion(expectation)
         }
         
-        public func _value() throws -> Record<Input, Failure>.Recording {
-            let (elements, completion) = recorder.elementsAndCompletion
-            if let completion = completion {
-                return Record<Input, Failure>.Recording(output: elements, completion: completion)
-            } else {
-                throw RecordingError.notCompleted
+        public func expectedValue() throws -> Record<Input, Failure>.Recording {
+            try recorder.value { (elements, completion, remainingElements, consume) in
+                if let completion = completion {
+                    consume(remainingElements.count)
+                    return Record<Input, Failure>.Recording(output: elements, completion: completion)
+                } else {
+                    throw RecordingError.notCompleted
+                }
             }
         }
     }

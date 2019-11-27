@@ -33,7 +33,7 @@ class LateSubscriptionTest: FailureTestCase {
             let publisher = NoSubscriptionPublisher()
             let recorder = publisher.record()
             
-            _ = try wait(for: recorder.first.inverted, timeout: 0.1)
+            try wait(for: recorder.next().inverted, timeout: 0.1)
         }
     }
     
@@ -69,7 +69,7 @@ class LateSubscriptionTest: FailureTestCase {
             let publisher = AsynchronousSubscriptionPublisher(base: Just("foo"))
             let recorder = publisher.record()
             
-            let element = try wait(for: recorder.first, timeout: 0.1)
+            let element = try wait(for: recorder.next(), timeout: 0.1)
             XCTAssertEqual(element, "foo")
             
             let (elements, completion) = recorder.elementsAndCompletion

@@ -17,11 +17,11 @@ import XCTest
 //      }
 
 extension PublisherExpectations {
-    /// A publisher expectation which waits for a publisher to
-    /// complete successfully.
+    /// A publisher expectation which waits for the recorded publisher
+    /// to complete.
     ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// fails with an error.
+    /// When waiting for this expectation, the publisher error is thrown if the
+    /// publisher fails.
     ///
     /// For example:
     ///
@@ -31,20 +31,50 @@ extension PublisherExpectations {
     ///         let recorder = publisher.record()
     ///         try wait(for: recorder.finished, timeout: 1)
     ///     }
-    public struct Finished<Input, Failure: Error>: InvertablePublisherExpectation {
+    ///
+    /// This publisher expectation can be inverted:
+    ///
+    ///     // SUCCESS: no timeout, no error
+    ///     func testPassthroughSubjectDoesNotFinish() throws {
+    ///         let publisher = PassthroughSubject<String, Never>()
+    ///         let recorder = publisher.record()
+    ///         try wait(for: recorder.finished.inverted, timeout: 1)
+    ///     }
+    public struct Finished<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             recorder.fulfillOnCompletion(expectation)
         }
         
-        public func _value() throws {
-            guard let completion = recorder.elementsAndCompletion.completion else {
-                return
+        public func expectedValue() throws {
+            try recorder.value { (_, completion, remainingElements, consume) in
+                guard let completion = completion else {
+                    consume(remainingElements.count)
+                    return
+                }
+                if case let .failure(error) = completion {
+                    throw error
+                }
             }
-            if case let .failure(error) = completion {
-                throw error
-            }
+        }
+        
+        /// Returns an inverted publisher expectation which waits for a
+        /// publisher to complete successfully.
+        ///
+        /// When waiting for this expectation, an error is thrown if the
+        /// publisher fails with an error.
+        ///
+        /// For example:
+        ///
+        ///     // SUCCESS: no timeout, no error
+        ///     func testPassthroughSubjectDoesNotFinish() throws {
+        ///         let publisher = PassthroughSubject<String, Never>()
+        ///         let recorder = publisher.record()
+        ///         try wait(for: recorder.finished.inverted, timeout: 1)
+        ///     }
+        public var inverted: Inverted<Self> {
+            return Inverted(base: self)
         }
     }
 }

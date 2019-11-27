@@ -16,27 +16,30 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public typealias Input = Input
     public typealias Failure = Failure
     
-    private struct Expectations {
-        var onInput: [(XCTestExpectation, remainingCount: Int)] = []
-        var onCompletion: [XCTestExpectation] = []
+    private enum RecorderExpectation {
+        case onInput(XCTestExpectation, remainingCount: Int)
+        case onCompletion(XCTestExpectation)
+        
+        var expectation: XCTestExpectation {
+            switch self {
+            case let .onCompletion(expectation):
+                return expectation
+            case let .onInput(expectation, remainingCount: _):
+                return expectation
+            }
+        }
     }
     
     private enum State {
-        case waitingForSubscription(Expectations)
-        case subscribed(Expectations, [Input], Subscription)
+        case waitingForSubscription(RecorderExpectation?)
+        case subscribed(Subscription, RecorderExpectation?, [Input])
         case completed([Input], Subscribers.Completion<Failure>)
-    }
-    
-    private let lock = NSLock()
-    private var state: State = .waitingForSubscription(Expectations())
-    
-    /// The elements and completion recorded so far.
-    public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
-        synchronized {
-            switch state {
+        
+        var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
+            switch self {
             case .waitingForSubscription:
                 return (elements: [], completion: nil)
-            case let .subscribed(_, elements, _):
+            case let .subscribed(_, _, elements):
                 return (elements: elements, completion: nil)
             case let .completed(elements, completion):
                 return (elements: elements, completion: completion)
@@ -44,11 +47,22 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         }
     }
     
+    private let lock = NSLock()
+    private var state = State.waitingForSubscription(nil)
+    private var consumedCount = 0
+    
+    /// The elements and completion recorded so far.
+    public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
+        synchronized {
+            state.elementsAndCompletion
+        }
+    }
+    
     /// Use Publisher.record()
     fileprivate init() { }
     
     deinit {
-        if case let .subscribed(_, _, subscription) = state {
+        if case let .subscribed(subscription, _, _) = state {
             subscription.cancel()
         }
     }
@@ -59,23 +73,30 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         return try execute()
     }
     
-    func fulfillOnInput(_ expectation: XCTestExpectation) {
+    // MARK: - PublisherExpectation API
+    
+    func fulfillOnInput(_ expectation: XCTestExpectation, includingConsumed: Bool) {
         synchronized {
             switch state {
-            case let .waitingForSubscription(expectations):
-                var expectations = expectations
-                expectations.onInput.append((expectation, remainingCount: expectation.expectedFulfillmentCount))
-                state = .waitingForSubscription(expectations)
+            case let .waitingForSubscription(exp):
+                preconditionNotWaiting(for: exp)
+                let exp = RecorderExpectation.onInput(expectation, remainingCount: expectation.expectedFulfillmentCount)
+                state = .waitingForSubscription(exp)
                 
-            case let .subscribed(expectations, elements, subscription):
-                let fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
+            case let .subscribed(subscription, exp, elements):
+                preconditionNotWaiting(for: exp)
+                let fulfillmentCount: Int
+                if includingConsumed {
+                    fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
+                } else {
+                    fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count - consumedCount)
+                }
                 expectation.fulfill(count: fulfillmentCount)
                 
                 let remainingCount = expectation.expectedFulfillmentCount - fulfillmentCount
                 if remainingCount > 0 {
-                    var expectations = expectations
-                    expectations.onInput.append((expectation, remainingCount: remainingCount))
-                    state = .subscribed(expectations, elements, subscription)
+                    let exp = RecorderExpectation.onInput(expectation, remainingCount: remainingCount)
+                    state = .subscribed(subscription, exp, elements)
                 }
                 
             case .completed:
@@ -87,19 +108,60 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     func fulfillOnCompletion(_ expectation: XCTestExpectation) {
         synchronized {
             switch state {
-            case let .waitingForSubscription(expectations):
-                var expectations = expectations
-                expectations.onCompletion.append(expectation)
-                state = .waitingForSubscription(expectations)
+            case let .waitingForSubscription(exp):
+                preconditionNotWaiting(for: exp)
+                let exp = RecorderExpectation.onCompletion(expectation)
+                state = .waitingForSubscription(exp)
                 
-            case let .subscribed(expectations, elements, subscription):
-                var expectations = expectations
-                expectations.onCompletion.append(expectation)
-                state = .subscribed(expectations, elements, subscription)
+            case let .subscribed(subscription, exp, elements):
+                preconditionNotWaiting(for: exp)
+                let exp = RecorderExpectation.onCompletion(expectation)
+                state = .subscribed(subscription, exp, elements)
                 
             case .completed:
                 expectation.fulfill()
             }
+        }
+    }
+    
+    /// Returns a value based on the recorded state of the publisher.
+    ///
+    /// - parameter value: A function which returns the value, given the
+    ///   recorded state of the publisher.
+    /// - parameter elements: All recorded elements.
+    /// - parameter completion: The eventual publisher completion.
+    /// - parameter remainingElements: The elements that were not consumed yet.
+    /// - parameter consume: A function which consumes elements.
+    /// - parameter count: The number of consumed elements.
+    /// - returns: The value
+    func value<T>(_ value: (
+        _ elements: [Input],
+        _ completion: Subscribers.Completion<Failure>?,
+        _ remainingElements: ArraySlice<Input>,
+        _ consume: (_ count: Int) -> ()) throws -> T)
+        rethrows -> T
+    {
+        try synchronized {
+            let (elements, completion) = state.elementsAndCompletion
+            let remainingElements = elements[consumedCount...]
+            return try value(elements, completion, remainingElements, { count in
+                precondition(count >= 0)
+                precondition(count <= remainingElements.count)
+                consumedCount += count
+            })
+        }
+    }
+    
+    // Recorder can fulfill a single expectation. When it is asked to fulfill
+    // another one, we have to check for programmer errors.
+    private func preconditionNotWaiting(for recorderExpectation: RecorderExpectation?) {
+        if let exp = recorderExpectation {
+            // We are already waiting for an expectation! Is it a programmer
+            // error? Recorder drops references to non-inverted expectations
+            // when they are fulfilled. But inverted expectations are not
+            // fulfilled, and thus not dropped. We can't quite know if an
+            // inverted expectations has expired yet, so just let it go.
+            precondition(exp.expectation.isInverted, "Already waiting for an expectation")
         }
     }
     
@@ -108,8 +170,8 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(subscription: Subscription) {
         synchronized {
             switch state {
-            case let .waitingForSubscription(expectations):
-                state = .subscribed(expectations, [], subscription)
+            case let .waitingForSubscription(exp):
+                state = .subscribed(subscription, exp, [])
             default:
                 XCTFail("Publisher recorder is already subscribed")
             }
@@ -120,21 +182,23 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(_ input: Input) -> Subscribers.Demand {
         return synchronized {
             switch state {
-            case let .subscribed(expectations, elements, subscription):
-                var inputExpectations: [(XCTestExpectation, remainingCount: Int)] = []
-                for (expectation, remainingCount) in expectations.onInput {
+            case let .subscribed(subscription, exp, elements):
+                var elements = elements
+                elements.append(input)
+                
+                if case let .onInput(expectation, remainingCount: remainingCount) = exp {
                     assert(remainingCount > 0)
                     expectation.fulfill()
                     if remainingCount > 1 {
-                        inputExpectations.append((expectation, remainingCount: remainingCount - 1))
+                        let exp = RecorderExpectation.onInput(expectation, remainingCount: remainingCount - 1)
+                        state = .subscribed(subscription, exp, elements)
+                    } else {
+                        state = .subscribed(subscription, nil, elements)
                     }
+                } else {
+                    state = .subscribed(subscription, exp, elements)
                 }
                 
-                var elements = elements
-                var expectations = expectations
-                elements.append(input)
-                expectations.onInput = inputExpectations
-                state = .subscribed(expectations, elements, subscription)
                 return .unlimited
                 
             case .waitingForSubscription:
@@ -151,12 +215,14 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     public func receive(completion: Subscribers.Completion<Failure>) {
         synchronized {
             switch state {
-            case let .subscribed(expectations, elements, _):
-                for (expectation, count) in expectations.onInput {
-                    expectation.fulfill(count: count)
-                }
-                for expectation in expectations.onCompletion {
-                    expectation.fulfill()
+            case let .subscribed(_, exp, elements):
+                if let exp = exp {
+                    switch exp {
+                    case let .onCompletion(expectation):
+                        expectation.fulfill()
+                    case let .onInput(expectation, remainingCount: remainingCount):
+                        expectation.fulfill(count: remainingCount)
+                    }
                 }
                 state = .completed(elements, completion)
                 
@@ -164,7 +230,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 XCTFail("Publisher recorder got unexpected completion before subscription: \(String(describing: completion))")
                 
             case .completed:
-                XCTFail("Publisher is already completed")
+                XCTFail("Publisher recorder got unexpected completion after completion: \(String(describing: completion))")
             }
         }
     }
@@ -179,10 +245,7 @@ extension PublisherExpectations {
     /// The type of the publisher expectation returned by Recorder.elements
     public typealias Elements<Input, Failure: Error> = Map<Recording<Input, Failure>, [Input]>
     
-    /// The type of the publisher expectation returned by Recorder.first
-    public typealias First<Input, Failure: Error> = Map<Prefix<Input, Failure>, Input?>
-    
-    /// The type of the publisher expectation returned by Recorder.lastt
+    /// The type of the publisher expectation returned by Recorder.last
     public typealias Last<Input, Failure: Error> = Map<Elements<Input, Failure>, Input?>
     
     /// The type of the publisher expectation returned by Recorder.single
@@ -269,40 +332,6 @@ extension Recorder {
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
-    /// to emit one element, or to complete.
-    ///
-    /// When waiting for this expectation, the publisher error is thrown if the
-    /// publisher fails before publishing any element.
-    ///
-    /// Otherwise, the first published element is returned, or nil if the publisher
-    /// completes before it publishes any element.
-    ///
-    /// For example:
-    ///
-    ///     // SUCCESS: no timeout, no error
-    ///     func testArrayOfThreeElementsPublishesItsFirstElementWithoutError() throws {
-    ///         let publisher = ["foo", "bar", "baz"].publisher
-    ///         let recorder = publisher.record()
-    ///         if let element = try wait(for: recorder.first, timeout: 1) {
-    ///             XCTAssertEqual(element, "foo")
-    ///         } else {
-    ///             XCTFail("Expected one element")
-    ///         }
-    ///     }
-    ///
-    /// This publisher expectation can be inverted:
-    ///
-    ///     // SUCCESS: no timeout, no error
-    ///     func testPassthroughSubjectDoesNotPublishAnyElement() throws {
-    ///         let publisher = PassthroughSubject<String, Never>()
-    ///         let recorder = publisher.record()
-    ///         _ = try wait(for: recorder.first.inverted, timeout: 1)
-    ///     }
-    public var first: PublisherExpectations.First<Input, Failure> {
-        prefix(1).map { $0.first }
-    }
-    
-    /// Returns a publisher expectation which waits for the recorded publisher
     /// to complete.
     ///
     /// When waiting for this expectation, a RecordingError.notCompleted is
@@ -326,6 +355,62 @@ extension Recorder {
     ///     }
     public var last: PublisherExpectations.Last<Input, Failure> {
         elements.map { $0.last }
+    }
+    
+    /// Returns a publisher expectation which waits for the recorded publisher
+    /// to emit one element, or to complete.
+    ///
+    /// When waiting for this expectation, a `RecordingError.notEnoughElements`
+    /// is thrown if the publisher does not publish one element after last
+    /// waited expectation. The publisher error is thrown if the publisher fails
+    /// before publishing the next element.
+    ///
+    /// Otherwise, the next published element is returned.
+    ///
+    /// For example:
+    ///
+    ///     // SUCCESS: no timeout, no error
+    ///     func testArrayOfTwoElementsPublishesElementsInOrder() throws {
+    ///         let publisher = ["foo", "bar"].publisher
+    ///         let recorder = publisher.record()
+    ///
+    ///         var element = try wait(for: recorder.next(), timeout: 1)
+    ///         XCTAssertEqual(element, "foo")
+    ///
+    ///         element = try wait(for: recorder.next(), timeout: 1)
+    ///         XCTAssertEqual(element, "bar")
+    ///     }
+    public func next() -> PublisherExpectations.NextOne<Input, Failure> {
+        PublisherExpectations.NextOne(recorder: self)
+    }
+    
+    /// Returns a publisher expectation which waits for the recorded publisher
+    /// to emit `count` elements, or to complete.
+    ///
+    /// When waiting for this expectation, a `RecordingError.notEnoughElements`
+    /// is thrown if the publisher does not publish `count` elements after last
+    /// waited expectation. The publisher error is thrown if the publisher fails
+    /// before publishing the next `count` element.
+    ///
+    /// Otherwise, an array of exactly `count` element is returned.
+    ///
+    /// For example:
+    ///
+    ///     // SUCCESS: no timeout, no error
+    ///     func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
+    ///         let publisher = ["foo", "bar", "baz"].publisher
+    ///         let recorder = publisher.record()
+    ///
+    ///         var elements = try wait(for: recorder.next(2), timeout: 1)
+    ///         XCTAssertEqual(elements, ["foo", "bar"])
+    ///
+    ///         elements = try wait(for: recorder.next(1), timeout: 1)
+    ///         XCTAssertEqual(elements, ["baz"])
+    ///     }
+    ///
+    /// - parameter count: The number of elements.
+    public func next(_ count: Int) -> PublisherExpectations.Next<Input, Failure> {
+        PublisherExpectations.Next(recorder: self, count: count)
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
@@ -411,10 +496,10 @@ extension Recorder {
     public var single: PublisherExpectations.Single<Input, Failure> {
         elements.map { elements in
             guard let element = elements.first else {
-                throw RecordingError.noElements
+                throw RecordingError.notEnoughElements
             }
             if elements.count > 1 {
-                throw RecordingError.moreThanOneElement
+                throw RecordingError.tooManyElements
             }
             return element
         }

@@ -8,17 +8,15 @@ extension PublisherExpectations {
         let base: Base
         let transform: (Base.Output) throws -> Output
         
-        public func _setup(_ expectation: XCTestExpectation) {
-            base._setup(expectation)
+        public func setup(_ expectation: XCTestExpectation) {
+            base.setup(expectation)
         }
         
-        public func _value() throws -> Output {
-            try transform(base._value())
+        public func expectedValue() throws -> Output {
+            try transform(base.expectedValue())
         }
     }
 }
-
-extension PublisherExpectations.Map: InvertablePublisherExpectation where Base: InvertablePublisherExpectation { }
 
 extension PublisherExpectation {
     /// Returns a publisher expectation that transforms the value of the

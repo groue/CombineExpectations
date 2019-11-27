@@ -2,16 +2,16 @@ import Foundation
 
 /// An error that may be thrown when waiting for publisher expectations.
 public enum RecordingError: Error {
-    /// Can be thrown when the publisher does not complete in time.
+    /// The publisher did not complete.
     case notCompleted
     
-    /// Can be thrown when waiting for `recorder.single`, when the publisher
-    /// does not publish any element.
-    case noElements
+    /// The publisher did not publish enough elements.
+    /// For example, see `recorder.single`.
+    case notEnoughElements
     
-    /// Can be thrown when waiting for `recorder.single`, when the publisher
-    /// publishes more than one element.
-    case moreThanOneElement
+    /// The publisher did publish too many elements.
+    /// For example, see `recorder.single`.
+    case tooManyElements
 }
 
 extension RecordingError: LocalizedError {
@@ -19,10 +19,10 @@ extension RecordingError: LocalizedError {
         switch self {
         case .notCompleted:
             return "RecordingError.notCompleted"
-        case .noElements:
-            return "RecordingError.noElements"
-        case .moreThanOneElement:
-            return "RecordingError.moreThanOneElement"
+        case .notEnoughElements:
+            return "RecordingError.notEnoughElements"
+        case .tooManyElements:
+            return "RecordingError.tooManyElements"
         }
     }
 }

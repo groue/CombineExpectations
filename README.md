@@ -4,7 +4,7 @@
 
 ---
 
-**Latest release**: [version 0.2.0](https://github.com/groue/CombineExpectations/tree/v0.2.0) (November 24, 2019) • [Release Notes]
+**Latest release**: [version 0.3.0](https://github.com/groue/CombineExpectations/tree/v0.3.0) (November 27, 2019) • [Release Notes]
 
 **Requirements**: iOS 13.0+ / macOS 10.15+ / watchOS 6.0+ &bull; Swift 5.1+ / Xcode 11.0+
 
@@ -20,7 +20,7 @@ CombineExpectations aims at streamlining those tests. It defines an XCTestCase m
 
 - [Usage]
 - [Installation]
-- [Publisher Expectations]: [completion], [elements], [finished], [first], [last], [prefix], [recording], [single]
+- [Publisher Expectations]: [completion], [elements], [finished], [last], [next()], [next(count)], [prefix(maxLength)], [recording], [single]
 
 ---
 
@@ -64,10 +64,10 @@ class PublisherTests: XCTestCase {
         let recorder = publisher.record()
         
         // Wait for first element
-        _ = try wait(for: recorder.first, timeout: ...)
+        _ = try wait(for: recorder.next(), timeout: ...)
         
         // Wait for second element
-        _ = try wait(for: recorder.prefix(2), timeout: ...)
+        _ = try wait(for: recorder.next(), timeout: ...)
         
         // Wait for successful completion
         try wait(for: recorder.finished, timeout: ...)
@@ -104,12 +104,12 @@ There are various publisher expectations. Each one waits for a specific publishe
 - [completion]: the publisher completion
 - [elements]: all published elements until completion
 - [finished]: the publisher successful completion
-- [first]: the first published element
 - [last]: the last published element
-- [prefix]: the first N published elements
+- [next()]: the next published element
+- [next(count)]: the next N published elements
+- [prefix(maxLength)]: the first N published elements
 - [recording]: the full recording of publisher events
 - [single]: the one and only published element
-- [Inverted Expectations]
 
 ---
 
@@ -163,7 +163,7 @@ func testCompletionTimeout() throws {
 
 :white_check_mark: Otherwise, an array of published elements is returned.
 
-:arrow_right: Related expectations: [last], [prefix], [recording], [single].
+:arrow_right: Related expectations: [last], [prefix(maxLength)], [recording], [single].
 
 Example:
 
@@ -244,7 +244,7 @@ func testFinishedError() throws {
 
 </details>
 
-This publisher expectation can be [inverted]:
+`recorder.finished` can be inverted:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -274,91 +274,6 @@ func testInvertedFinishedError() throws {
 
 ---
 
-### first
-
-:clock230: `recorder.first` waits for the recorded publisher to emit one element, or to complete.
-
-:x: When waiting for this expectation, the publisher error is thrown if the publisher fails before publishing any element.
-
-:white_check_mark: Otherwise, the first published element is returned, or nil if the publisher completes before it publishes any element.
-
-:arrow_right: Related expectations: [last], [prefix], [single].
-
-Example:
-
-```swift
-// SUCCESS: no timeout, no error
-func testArrayOfThreeElementsPublishesItsFirstElementWithoutError() throws {
-    let publisher = ["foo", "bar", "baz"].publisher
-    let recorder = publisher.record()
-    if let element = try wait(for: recorder.first, timeout: 1) {
-        XCTAssertEqual(element, "foo")
-    } else {
-        XCTFail("Expected one element")
-    }
-}
-```
-
-<details>
-    <summary>Examples of failing tests</summary>
-
-```swift
-// FAIL: Asynchronous wait failed
-func testFirstTimeout() throws {
-    let publisher = PassthroughSubject<String, Never>()
-    let recorder = publisher.record()
-    let element = try wait(for: recorder.first, timeout: 1)
-}
-    
-// FAIL: Caught error MyError
-func testFirstError() throws {
-    let publisher = PassthroughSubject<String, MyError>()
-    let recorder = publisher.record()
-    publisher.send(completion: .failure(MyError()))
-    let element = try wait(for: recorder.first, timeout: 1)
-}
-```
-
-</details>
-
-This publisher expectation can be [inverted]:
-
-```swift
-// SUCCESS: no timeout, no error
-func testPassthroughSubjectDoesNotPublishAnyElement() throws {
-    let publisher = PassthroughSubject<String, Never>()
-    let recorder = publisher.record()
-    _ = try wait(for: recorder.first.inverted, timeout: 1)
-}
-```
-
-<details>
-    <summary>Examples of failing tests</summary>
-
-```swift    
-// FAIL: Fulfilled inverted expectation
-func testInvertedFirstTooEarly() throws {
-    let publisher = PassthroughSubject<String, Never>()
-    let recorder = publisher.record()
-    publisher.send("foo")
-    _ = try wait(for: recorder.first.inverted, timeout: 1)
-}
-    
-// FAIL: Fulfilled inverted expectation
-// FAIL: Caught error MyError
-func testInvertedFirstError() throws {
-    let publisher = PassthroughSubject<String, MyError>()
-    let recorder = publisher.record()
-    publisher.send(completion: .failure(MyError()))
-    _ = try wait(for: recorder.first.inverted, timeout: 1)
-}
-```
-
-</details>
-
-
----
-
 ### last
 
 :clock230: `recorder.last` waits for the recorded publisher to complete.
@@ -367,7 +282,7 @@ func testInvertedFirstError() throws {
 
 :white_check_mark: Otherwise, the last published element is returned, or nil if the publisher completes before it publishes any element.
 
-:arrow_right: Related expectations: [elements], [first], [single].
+:arrow_right: Related expectations: [elements], [single].
 
 Example:
 
@@ -387,7 +302,7 @@ func testArrayPublisherPublishesLastElementLast() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notCompleted
 func testLastTimeout() throws {
@@ -410,7 +325,165 @@ func testLastError() throws {
 
 ---
 
-### prefix
+### next()
+
+:clock230: `recorder.next()` waits for the recorded publisher to emit one element, or to complete.
+
+:x: When waiting for this expectation, a `RecordingError.notEnoughElements` is thrown if the publisher does not publish one element after last waited expectation. The publisher error is thrown if the publisher fails before publishing the next element.
+
+:white_check_mark: Otherwise, the next published element is returned.
+
+:arrow_right: Related expectation: [next(count)].
+
+Example:
+
+```swift
+// SUCCESS: no timeout, no error
+func testArrayOfTwoElementsPublishesElementsInOrder() throws {
+    let publisher = ["foo", "bar"].publisher
+    let recorder = publisher.record()
+    
+    var element = try wait(for: recorder.next(), timeout: 1)
+    XCTAssertEqual(element, "foo")
+    
+    element = try wait(for: recorder.next(), timeout: 1)
+    XCTAssertEqual(element, "bar")
+}
+```
+
+<details>
+    <summary>Examples of failing tests</summary>
+
+```swift
+// FAIL: Asynchronous wait failed
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextTimeout() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    let element = try wait(for: recorder.next(), timeout: 1)
+}
+
+// FAIL: Caught error MyError
+func testNextError() throws {
+    let publisher = PassthroughSubject<String, MyError>()
+    let recorder = publisher.record()
+    publisher.send(completion: .failure(MyError()))
+    let element = try wait(for: recorder.next(), timeout: 1)
+}
+
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextNotEnoughElementsError() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send(completion: .finished)
+    let element = try wait(for: recorder.next(), timeout: 1)
+}
+```
+
+</details>
+
+`recorder.next()` can be inverted:
+
+```swift
+// SUCCESS: no timeout, no error
+func testPassthroughSubjectDoesNotPublishAnyElement() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    try wait(for: recorder.next().inverted, timeout: 1)
+}
+```
+
+<details>
+    <summary>Examples of failing tests</summary>
+
+```swift
+// FAIL: Fulfilled inverted expectation
+func testInvertedNextTooEarly() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    try wait(for: recorder.next().inverted, timeout: 0.1)
+}
+
+// FAIL: Fulfilled inverted expectation
+// FAIL: Caught error MyError
+func testInvertedNextError() throws {
+    let publisher = PassthroughSubject<String, MyError>()
+    let recorder = publisher.record()
+    publisher.send(completion: .failure(MyError()))
+    try wait(for: recorder.next().inverted, timeout: 0.1)
+}
+```
+
+</details>
+
+
+---
+
+### next(count)
+
+:clock230: `recorder.next(count)` waits for the recorded publisher to emit `count` elements, or to complete.
+
+:x: When waiting for this expectation, a `RecordingError.notEnoughElements` is thrown if the publisher does not publish `count` elements after last waited expectation. The publisher error is thrown if the publisher fails before publishing the next `count` element.
+
+:white_check_mark: Otherwise, an array of exactly `count` element is returned.
+
+:arrow_right: Related expectations: [next()], [prefix(maxLength)].
+
+Example:
+
+```swift
+// SUCCESS: no timeout, no error
+func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
+    let publisher = ["foo", "bar", "baz"].publisher
+    let recorder = publisher.record()
+
+    var elements = try wait(for: recorder.next(2), timeout: 1)
+    XCTAssertEqual(elements, ["foo", "bar"])
+
+    elements = try wait(for: recorder.next(1), timeout: 1)
+    XCTAssertEqual(elements, ["baz"])
+}
+```
+
+<details>
+    <summary>Examples of failing tests</summary>
+
+```swift
+// FAIL: Asynchronous wait failed
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextCountTimeout() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    let elements = try wait(for: recorder.next(2), timeout: 1)
+}
+
+// FAIL: Caught error MyError
+func testNextCountError() throws {
+    let publisher = PassthroughSubject<String, MyError>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    publisher.send(completion: .failure(MyError()))
+    let elements = try wait(for: recorder.next(2), timeout: 1)
+}
+
+// FAIL: Caught error RecordingError.notEnoughElements
+func testNextCountNotEnoughElementsError() throws {
+    let publisher = PassthroughSubject<String, Never>()
+    let recorder = publisher.record()
+    publisher.send("foo")
+    publisher.send(completion: .finished)
+    let elements = try wait(for: recorder.next(2), timeout: 1)
+}
+```
+
+</details>
+
+
+---
+
+### prefix(maxLength)
 
 :clock230: `recorder.prefix(maxLength)` waits for the recorded publisher to emit `maxLength` elements, or to complete.
 
@@ -418,7 +491,7 @@ func testLastError() throws {
 
 :white_check_mark: Otherwise, an array of received elements is returned, containing at most `maxLength` elements, or less if the publisher completes early.
 
-:arrow_right: Related expectations: [elements], [first].
+:arrow_right: Related expectations: [elements], [next(count)].
 
 Example:
 
@@ -435,7 +508,7 @@ func testArrayOfThreeElementsPublishesTwoFirstElementsWithoutError() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 func testPrefixTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
@@ -456,7 +529,7 @@ func testPrefixError() throws {
 
 </details>
 
-This publisher expectation can be [inverted]:
+`recorder.prefix(maxLength)` can be inverted:
 
 ```swift
 // SUCCESS: no timeout, no error
@@ -528,7 +601,7 @@ func testArrayPublisherRecording() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notCompleted
 func testRecordingTimeout() throws {
@@ -551,7 +624,7 @@ func testRecordingTimeout() throws {
 
 :white_check_mark: Otherwise, the single published element is returned.
 
-:arrow_right: Related expectations: [elements], [first], [last].
+:arrow_right: Related expectations: [elements], [last].
 
 Example:
 
@@ -568,7 +641,7 @@ func testJustPublishesExactlyOneElement() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift    
+```swift
 // FAIL: Asynchronous wait failed
 // FAIL: Caught error RecordingError.notCompleted
 func testSingleTimeout() throws {
@@ -585,8 +658,8 @@ func testSingleError() throws {
     let element = try wait(for: recorder.single, timeout: 1)
 }
     
-// FAIL: Caught error RecordingError.moreThanOneElement
-func testSingleMoreThanOneElementError() throws {
+// FAIL: Caught error RecordingError.tooManyElements
+func testSingleTooManyElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send("foo")
@@ -595,8 +668,8 @@ func testSingleMoreThanOneElementError() throws {
     let element = try wait(for: recorder.single, timeout: 1)
 }
     
-// FAIL: Caught error RecordingError.noElements
-func testSingleNoElementsError() throws {
+// FAIL: Caught error RecordingError.notEnoughElements
+func testSingleNotEnoughElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send(completion: .finished)
@@ -607,36 +680,16 @@ func testSingleNoElementsError() throws {
 </details>
 
 
----
-
-### Inverted Expectations
-
-Some expectations can be inverted ([finished], [first], [prefix]). An inverted expectation fails if the base expectation fulfills within the specified timeout.
-
-When waiting for an inverted expectation, you receive the same result and eventual error as the base expectation.
-
-For example:
-
-```swift
-// SUCCESS: no timeout, no error
-func testPassthroughSubjectDoesNotFinish() throws {
-    let publisher = PassthroughSubject<String, Never>()
-    let recorder = publisher.record()
-    try wait(for: recorder.finished.inverted, timeout: 1)
-}
-```
-
 [Release Notes]: CHANGELOG.md
 [Usage]: #usage
 [Installation]: #installation
 [Publisher Expectations]: #publisher-expectations
 [finished]: #finished
-[prefix]: #prefix
-[first]: #first
+[prefix(maxLength)]: #prefixmaxlength
+[next()]: #next
+[next(count)]: #nextcount
 [recording]: #recording
 [completion]: #completion
 [elements]: #elements
 [last]: #last
 [single]: #single
-[Inverted Expectations]: #inverted-expectations
-[inverted]: #inverted-expectations
