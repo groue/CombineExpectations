@@ -5,10 +5,14 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
 
-## Next Release
+
+## 0.3.0
+
+Released November 27, 2019 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.2.0...v0.3.0)
 
 - [#2](https://github.com/groue/CombineExpectations/pull/2): RecordingError renaming
 - [#3](https://github.com/groue/CombineExpectations/pull/3): Next Expectation
