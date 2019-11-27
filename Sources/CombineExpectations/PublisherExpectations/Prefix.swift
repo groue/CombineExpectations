@@ -1,14 +1,14 @@
 import XCTest
 
 extension PublisherExpectations {
-    /// A publisher expectation which waits for a publisher to emit a certain
-    /// number of elements, or to complete.
+    /// A publisher expectation which waits for the recorded publisher to emit
+    /// `maxLength` elements, or to complete.
     ///
-    /// The awaited array may contain less than `maxLength` elements, if the
-    /// publisher completes early.
+    /// When waiting for this expectation, the publisher error is thrown if the
+    /// publisher fails before `maxLength` elements are published.
     ///
-    /// When waiting for this expectation, an error is thrown if the publisher
-    /// fails before `maxLength` elements are published.
+    /// Otherwise, an array of received elements is returned, containing at
+    /// most `maxLength` elements, or less if the publisher completes early.
     ///
     /// For example:
     ///
@@ -19,7 +19,19 @@ extension PublisherExpectations {
     ///         let elements = try wait(for: recorder.prefix(2), timeout: 1)
     ///         XCTAssertEqual(elements, ["foo", "bar"])
     ///     }
-    public struct Prefix<Input, Failure: Error>: InvertablePublisherExpectation {
+    ///
+    /// This publisher expectation can be inverted:
+    ///
+    ///     // SUCCESS: no timeout, no error
+    ///     func testPassthroughSubjectPublishesNoMoreThanSentValues() throws {
+    ///         let publisher = PassthroughSubject<String, Never>()
+    ///         let recorder = publisher.record()
+    ///         publisher.send("foo")
+    ///         publisher.send("bar")
+    ///         let elements = try wait(for: recorder.prefix(3).inverted, timeout: 1)
+    ///         XCTAssertEqual(elements, ["foo", "bar"])
+    ///     }
+    public struct Prefix<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         let maxLength: Int
         
@@ -29,26 +41,54 @@ extension PublisherExpectations {
             self.maxLength = maxLength
         }
         
-        public func _setup(_ expectation: XCTestExpectation) {
+        public func setup(_ expectation: XCTestExpectation) {
             if maxLength == 0 {
                 // Such an expectation is immediately fulfilled, by essence.
                 expectation.expectedFulfillmentCount = 1
                 expectation.fulfill()
             } else {
                 expectation.expectedFulfillmentCount = maxLength
-                recorder.fulfillOnInput(expectation)
+                recorder.fulfillOnInput(expectation, includingConsumed: true)
             }
         }
         
-        public func _value() throws -> [Input] {
-            let (elements, completion) = recorder.elementsAndCompletion
-            if elements.count >= maxLength {
-                return Array(elements.prefix(maxLength))
+        public func expectedValue() throws -> [Input] {
+            try recorder.value { (elements, completion, remainingElements, consume) in
+                if elements.count >= maxLength {
+                    let extraCount = max(maxLength + remainingElements.count - elements.count, 0)
+                    consume(extraCount)
+                    return Array(elements.prefix(maxLength))
+                }
+                if case let .failure(error) = completion {
+                    throw error
+                }
+                consume(remainingElements.count)
+                return elements
             }
-            if case let .failure(error) = completion {
-                throw error
-            }
-            return elements
+        }
+        
+        /// Returns an inverted publisher expectation which waits for a
+        /// publisher to emit `maxLength` elements, or to complete.
+        ///
+        /// When waiting for this expectation, the publisher error is thrown
+        /// if the publisher fails before `maxLength` elements are published.
+        ///
+        /// Otherwise, an array of received elements is returned, containing at
+        /// most `maxLength` elements, or less if the publisher completes early.
+        ///
+        /// For example:
+        ///
+        ///     // SUCCESS: no timeout, no error
+        ///     func testPassthroughSubjectPublishesNoMoreThanSentValues() throws {
+        ///         let publisher = PassthroughSubject<String, Never>()
+        ///         let recorder = publisher.record()
+        ///         publisher.send("foo")
+        ///         publisher.send("bar")
+        ///         let elements = try wait(for: recorder.prefix(3).inverted, timeout: 1)
+        ///         XCTAssertEqual(elements, ["foo", "bar"])
+        ///     }
+        public var inverted: Inverted<Self> {
+            return Inverted(base: self)
         }
     }
 }

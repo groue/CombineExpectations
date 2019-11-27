@@ -19,13 +19,11 @@ public enum PublisherExpectations { }
 public protocol PublisherExpectation {
     associatedtype Output
     
-    /// Implementation detail: don't use this method.
     /// :nodoc:
-    func _setup(_ expectation: XCTestExpectation)
+    func setup(_ expectation: XCTestExpectation)
     
-    /// Implementation detail: don't use this method.
     /// :nodoc:
-    func _value() throws -> Output
+    func expectedValue() throws -> Output
 }
 
 extension XCTestCase {
@@ -55,8 +53,8 @@ extension XCTestCase {
         throws -> R.Output
     {
         let expectation = self.expectation(description: description)
-        publisherExpectation._setup(expectation)
+        publisherExpectation.setup(expectation)
         wait(for: [expectation], timeout: timeout)
-        return try publisherExpectation._value()
+        return try publisherExpectation.expectedValue()
     }
 }

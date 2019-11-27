@@ -33,7 +33,7 @@ class LateSubscriptionTest: FailureTestCase {
             let publisher = NoSubscriptionPublisher()
             let recorder = publisher.record()
             
-            _ = try wait(for: recorder.first.inverted, timeout: 0.1)
+            try wait(for: recorder.first.inverted, timeout: 0.1)
         }
     }
     
