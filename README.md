@@ -426,7 +426,7 @@ func testInvertedNextError() throws {
 
 :x: When waiting for this expectation, a `RecordingError.notEnoughElements` is thrown if the publisher does not publish `count` elements after last waited expectation. The publisher error is thrown if the publisher fails before publishing the next `count` elements.
 
-:white_check_mark: Otherwise, an array of exactly `count` element is returned.
+:white_check_mark: Otherwise, an array of exactly `count` elements is returned.
 
 :arrow_right: Related expectations: [next()], [prefix(maxLength)].
 

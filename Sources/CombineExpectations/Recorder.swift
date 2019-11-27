@@ -392,7 +392,7 @@ extension Recorder {
     /// waited expectation. The publisher error is thrown if the publisher fails
     /// before publishing the next `count` elements.
     ///
-    /// Otherwise, an array of exactly `count` element is returned.
+    /// Otherwise, an array of exactly `count` elements is returned.
     ///
     /// For example:
     ///
