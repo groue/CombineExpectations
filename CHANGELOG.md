@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 ## Next Release
 
 - [#2](https://github.com/groue/CombineExpectations/pull/2): RecordingError renaming
-- [#2](https://github.com/groue/CombineExpectations/pull/3): Next Expectation
+- [#3](https://github.com/groue/CombineExpectations/pull/3): Next Expectation
 
 
 ## 0.2.0
