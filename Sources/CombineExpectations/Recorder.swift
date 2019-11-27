@@ -332,40 +332,6 @@ extension Recorder {
     }
     
     /// Returns a publisher expectation which waits for the recorded publisher
-    /// to emit one element, or to complete.
-    ///
-    /// When waiting for this expectation, the publisher error is thrown if the
-    /// publisher fails before publishing any element.
-    ///
-    /// Otherwise, the first published element is returned, or nil if the publisher
-    /// completes before it publishes any element.
-    ///
-    /// For example:
-    ///
-    ///     // SUCCESS: no timeout, no error
-    ///     func testArrayOfThreeElementsPublishesItsFirstElementWithoutError() throws {
-    ///         let publisher = ["foo", "bar", "baz"].publisher
-    ///         let recorder = publisher.record()
-    ///         if let element = try wait(for: recorder.first, timeout: 1) {
-    ///             XCTAssertEqual(element, "foo")
-    ///         } else {
-    ///             XCTFail("Expected one element")
-    ///         }
-    ///     }
-    ///
-    /// This publisher expectation can be inverted:
-    ///
-    ///     // SUCCESS: no timeout, no error
-    ///     func testPassthroughSubjectDoesNotPublishAnyElement() throws {
-    ///         let publisher = PassthroughSubject<String, Never>()
-    ///         let recorder = publisher.record()
-    ///         try wait(for: recorder.first.inverted, timeout: 1)
-    ///     }
-    public var first: PublisherExpectations.First<Input, Failure> {
-        PublisherExpectations.First(recorder: self)
-    }
-    
-    /// Returns a publisher expectation which waits for the recorded publisher
     /// to complete.
     ///
     /// When waiting for this expectation, a RecordingError.notCompleted is
