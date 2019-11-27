@@ -102,7 +102,7 @@ Add a dependency for CombineExpectations to your [Swift Package](https://swift.o
 There are various publisher expectations. Each one waits for a specific publisher aspect:
 
 - [completion]: the publisher completion
-- [elements]: all published elements until completion
+- [elements]: all published elements until successful completion
 - [finished]: the publisher successful completion
 - [last]: the last published element
 - [next()]: the next published element
