@@ -48,7 +48,7 @@ extension XCTestCase {
     /// - throws: An error if the expectation fails.
     public func wait<R: PublisherExpectation>(
         for publisherExpectation: R,
-        timeout: TimeInterval,
+        timeout: TimeInterval = 1.0,
         description: String = "")
         throws -> R.Output
     {
