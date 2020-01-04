@@ -27,11 +27,27 @@ extension PublisherExpectations {
     public struct NextOne<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func setup(_ expectation: XCTestExpectation) {
+        public func _setup(_ expectation: XCTestExpectation) {
             recorder.fulfillOnInput(expectation, includingConsumed: false)
         }
         
-        public func expectedValue() throws -> Input? {
+        /// Returns the expected output, or throws an error if the
+        /// expectation fails.
+        ///
+        /// For example:
+        ///
+        ///     // SUCCESS: no error
+        ///     func testArrayOfTwoElementsSynchronouslyPublishesElementsInOrder() throws {
+        ///         let publisher = ["foo", "bar"].publisher
+        ///         let recorder = publisher.record()
+        ///
+        ///         var element = try recorder.next().get()
+        ///         XCTAssertEqual(element, "foo")
+        ///
+        ///         element = try recorder.next().get()
+        ///         XCTAssertEqual(element, "bar")
+        ///     }
+        public func get() throws -> Input? {
             try recorder.value { (_, completion, remainingElements, consume) in
                 if let next = remainingElements.first {
                     consume(1)
@@ -85,12 +101,12 @@ extension PublisherExpectations {
     public struct NextOneInverted<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func setup(_ expectation: XCTestExpectation) {
+        public func _setup(_ expectation: XCTestExpectation) {
             expectation.isInverted = true
             recorder.fulfillOnInput(expectation, includingConsumed: false)
         }
         
-        public func expectedValue() throws {
+        public func get() throws {
             try recorder.value { (_, completion, remainingElements, consume) in
                 if remainingElements.isEmpty == false {
                     return

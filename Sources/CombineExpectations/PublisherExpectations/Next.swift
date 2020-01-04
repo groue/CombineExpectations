@@ -34,7 +34,7 @@ extension PublisherExpectations {
             self.count = count
         }
         
-        public func setup(_ expectation: XCTestExpectation) {
+        public func _setup(_ expectation: XCTestExpectation) {
             if count == 0 {
                 // Such an expectation is immediately fulfilled, by essence.
                 expectation.expectedFulfillmentCount = 1
@@ -45,7 +45,23 @@ extension PublisherExpectations {
             }
         }
         
-        public func expectedValue() throws -> [Input] {
+        /// Returns the expected output, or throws an error if the
+        /// expectation fails.
+        ///
+        /// For example:
+        ///
+        ///     // SUCCESS: no error
+        ///     func testArrayOfThreeElementsSynchronouslyPublishesTwoThenOneElement() throws {
+        ///         let publisher = ["foo", "bar", "baz"].publisher
+        ///         let recorder = publisher.record()
+        ///
+        ///         var elements = try recorder.next(2).get()
+        ///         XCTAssertEqual(elements, ["foo", "bar"])
+        ///
+        ///         elements = try recorder.next(1).get()
+        ///         XCTAssertEqual(elements, ["baz"])
+        ///     }
+        public func get() throws -> [Input] {
             try recorder.value { (_, completion, remainingElements, consume) in
                 if remainingElements.count >= count {
                     consume(count)

@@ -26,11 +26,26 @@ extension PublisherExpectations {
     public struct Recording<Input, Failure: Error>: PublisherExpectation {
         let recorder: Recorder<Input, Failure>
         
-        public func setup(_ expectation: XCTestExpectation) {
+        public func _setup(_ expectation: XCTestExpectation) {
             recorder.fulfillOnCompletion(expectation)
         }
         
-        public func expectedValue() throws -> Record<Input, Failure>.Recording {
+        /// Returns the expected output, or throws an error if the
+        /// expectation fails.
+        ///
+        /// For example:
+        ///
+        ///     // SUCCESS: no error
+        ///     func testArrayPublisherSynchronousRecording() throws {
+        ///         let publisher = ["foo", "bar", "baz"].publisher
+        ///         let recorder = publisher.record()
+        ///         let recording = try recorder.recording.get()
+        ///         XCTAssertEqual(recording.output, ["foo", "bar", "baz"])
+        ///         if case let .failure(error) = recording.completion {
+        ///             XCTFail("Unexpected error \(error)")
+        ///         }
+        ///     }
+        public func get() throws -> Record<Input, Failure>.Recording {
             try recorder.value { (elements, completion, remainingElements, consume) in
                 if let completion = completion {
                     consume(remainingElements.count)

@@ -52,7 +52,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     private var consumedCount = 0
     
     /// The elements and completion recorded so far.
-    public var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
+    var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
         synchronized {
             state.elementsAndCompletion
         }

@@ -10,6 +10,15 @@ All notable changes to this project will be documented in this file.
 - [0.1.0](#010)
 
 
+## Next Release
+
+- [#6](https://github.com/groue/CombineExpectations/pull/6): Support for synchronous tests
+
+**Documentation diff**:
+
+The [Usage] section shows how to use the new `get()` method in order to perform synchronous tests that do not have to wait.
+
+
 ## 0.3.0
 
 Released November 27, 2019 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.2.0...v0.3.0)
@@ -30,3 +39,5 @@ Released November 24, 2019 &bull; [diff](https://github.com/groue/CombineExpecta
 Released November 23, 2019
 
 **Initial release**
+
+[Usage]: README.md#usage

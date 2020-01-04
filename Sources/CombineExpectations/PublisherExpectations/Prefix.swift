@@ -41,7 +41,7 @@ extension PublisherExpectations {
             self.maxLength = maxLength
         }
         
-        public func setup(_ expectation: XCTestExpectation) {
+        public func _setup(_ expectation: XCTestExpectation) {
             if maxLength == 0 {
                 // Such an expectation is immediately fulfilled, by essence.
                 expectation.expectedFulfillmentCount = 1
@@ -52,7 +52,19 @@ extension PublisherExpectations {
             }
         }
         
-        public func expectedValue() throws -> [Input] {
+        /// Returns the expected output, or throws an error if the
+        /// expectation fails.
+        ///
+        /// For example:
+        ///
+        ///     // SUCCESS: no error
+        ///     func testArrayOfThreeElementsSynchronouslyPublishesTwoFirstElementsWithoutError() throws {
+        ///         let publisher = ["foo", "bar", "baz"].publisher
+        ///         let recorder = publisher.record()
+        ///         let elements = try recorder.prefix(2).get()
+        ///         XCTAssertEqual(elements, ["foo", "bar"])
+        ///     }
+        public func get() throws -> [Input] {
             try recorder.value { (elements, completion, remainingElements, consume) in
                 if elements.count >= maxLength {
                     let extraCount = max(maxLength + remainingElements.count - elements.count, 0)
