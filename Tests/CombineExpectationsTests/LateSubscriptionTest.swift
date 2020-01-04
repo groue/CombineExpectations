@@ -1,7 +1,7 @@
 import XCTest
 import Combine
 import Foundation
-import CombineExpectations
+@testable import CombineExpectations
 
 /// Tests for subscribers that do not create subscriptions right when they
 /// receive subscribers.

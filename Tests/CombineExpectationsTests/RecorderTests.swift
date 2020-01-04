@@ -1,7 +1,7 @@
 import XCTest
 import Combine
 import Foundation
-import CombineExpectations
+@testable import CombineExpectations
 
 /// General tests for publisher expectations
 class RecorderTests: XCTestCase {
