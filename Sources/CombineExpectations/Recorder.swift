@@ -46,7 +46,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
             }
         }
         
-        var recordedExpectation: RecorderExpectation? {
+        var recorderExpectation: RecorderExpectation? {
             switch self {
             case let .waitingForSubscription(exp), let .subscribed(_, exp, _):
                 return exp
@@ -181,7 +181,7 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     ///
     /// This method MUST be called within a synchronized block.
     private func preconditionCanFulfillExpectation() {
-        if let exp = state.recordedExpectation {
+        if let exp = state.recorderExpectation {
             // We are already waiting for an expectation! Is it a programmer
             // error? Recorder drops references to non-inverted expectations
             // when they are fulfilled. But inverted expectations are not
