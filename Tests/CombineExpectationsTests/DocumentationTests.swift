@@ -8,6 +8,16 @@ class DocumentationTests: FailureTestCase {
     
     // MARK: - Completion
     
+    // SUCCESS: no error
+    func testArrayPublisherSynchronouslyCompletesWithSuccess() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+        let completion = try recorder.completion.get()
+        if case let .failure(error) = completion {
+            XCTFail("Unexpected error \(error)")
+        }
+    }
+    
     // SUCCESS: no timeout, no error
     func testArrayPublisherCompletesWithSuccess() throws {
         let publisher = ["foo", "bar", "baz"].publisher
@@ -144,6 +154,17 @@ class DocumentationTests: FailureTestCase {
     
     // MARK: - Last
     
+    // SUCCESS: no error
+    func testArrayPublisherSynchronouslyPublishesLastElementLast() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+        if let element = try recorder.last.get() {
+            XCTAssertEqual(element, "baz")
+        } else {
+            XCTFail("Expected one element")
+        }
+    }
+    
     // SUCCESS: no timeout, no error
     func testArrayPublisherPublishesLastElementLast() throws {
         let publisher = ["foo", "bar", "baz"].publisher
@@ -180,6 +201,18 @@ class DocumentationTests: FailureTestCase {
     }
     
     // MARK: - next()
+    
+    // SUCCESS: no error
+    func testPassthroughSubjectSynchronouslyPublishesElements() throws {
+        let publisher = PassthroughSubject<String, Never>()
+        let recorder = publisher.record()
+        
+        publisher.send("foo")
+        try XCTAssertEqual(recorder.next().get(), "foo")
+        
+        publisher.send("bar")
+        try XCTAssertEqual(recorder.next().get(), "bar")
+    }
     
     // SUCCESS: no error
     func testArrayOfTwoElementsSynchronouslyPublishesElementsInOrder() throws {
@@ -454,6 +487,14 @@ class DocumentationTests: FailureTestCase {
     }
     
     // MARK: - Single
+    
+    // SUCCESS: no error
+    func testJustSynchronouslyPublishesExactlyOneElement() throws {
+        let publisher = Just("foo")
+        let recorder = publisher.record()
+        let element = try recorder.single.get()
+        XCTAssertEqual(element, "foo")
+    }
     
     // SUCCESS: no timeout, no error
     func testJustPublishesExactlyOneElement() throws {
