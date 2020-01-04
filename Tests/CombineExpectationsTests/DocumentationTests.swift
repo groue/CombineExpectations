@@ -33,6 +33,13 @@ class DocumentationTests: FailureTestCase {
     
     // MARK: - Elements
     
+    func testArrayPublisherSynchronouslyPublishesArrayElements() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+        let elements = try recorder.elements.get()
+        XCTAssertEqual(elements, ["foo", "bar", "baz"])
+    }
+    
     // SUCCESS: no timeout, no error
     func testArrayPublisherPublishesArrayElements() throws {
         let publisher = ["foo", "bar", "baz"].publisher
@@ -40,7 +47,7 @@ class DocumentationTests: FailureTestCase {
         let elements = try wait(for: recorder.elements, timeout: 0.1)
         XCTAssertEqual(elements, ["foo", "bar", "baz"])
     }
-    
+
     // FAIL: Asynchronous wait failed
     // FAIL: Caught error RecordingError.notCompleted
     func testElementsTimeout() throws {
@@ -55,6 +62,17 @@ class DocumentationTests: FailureTestCase {
     }
     
     // FAIL: Caught error MyError
+    func testElementsSynchronousError() throws {
+        do {
+            let publisher = PassthroughSubject<String, MyError>()
+            let recorder = publisher.record()
+            publisher.send(completion: .failure(MyError()))
+            _ = try recorder.elements.get()
+            XCTFail("Expected error")
+        } catch is MyError { }
+    }
+
+    // FAIL: Caught error MyError
     func testElementsError() throws {
         do {
             let publisher = PassthroughSubject<String, MyError>()
@@ -66,6 +84,13 @@ class DocumentationTests: FailureTestCase {
     }
     
     // MARK: - Finished
+    
+    // SUCCESS: no error
+    func testArrayPublisherSynchronouslyFinishesWithoutError() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+        try recorder.finished.get()
+    }
     
     // SUCCESS: no timeout, no error
     func testArrayPublisherFinishesWithoutError() throws {
@@ -156,6 +181,18 @@ class DocumentationTests: FailureTestCase {
     
     // MARK: - next()
     
+    // SUCCESS: no error
+    func testArrayOfTwoElementsSynchronouslyPublishesElementsInOrder() throws {
+        let publisher = ["foo", "bar"].publisher
+        let recorder = publisher.record()
+    
+        var element = try recorder.next().get()
+        XCTAssertEqual(element, "foo")
+    
+        element = try recorder.next().get()
+        XCTAssertEqual(element, "bar")
+    }
+    
     // SUCCESS: no timeout, no error
     func testArrayOfTwoElementsPublishesElementsInOrder() throws {
         let publisher = ["foo", "bar"].publisher
@@ -238,6 +275,18 @@ class DocumentationTests: FailureTestCase {
     
     // MARK: - next(count)
     
+    // SUCCESS: no error
+    func testArrayOfThreeElementsSynchronouslyPublishesTwoThenOneElement() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+    
+        var elements = try recorder.next(2).get()
+        XCTAssertEqual(elements, ["foo", "bar"])
+    
+        elements = try recorder.next(1).get()
+        XCTAssertEqual(elements, ["baz"])
+    }
+    
     // SUCCESS: no timeout, no error
     func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
         let publisher = ["foo", "bar", "baz"].publisher
@@ -289,6 +338,14 @@ class DocumentationTests: FailureTestCase {
     }
     
     // MARK: - Prefix
+    
+    // SUCCESS: no error
+    func testArrayOfThreeElementsSynchronouslyPublishesTwoFirstElementsWithoutError() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+        let elements = try recorder.prefix(2).get()
+        XCTAssertEqual(elements, ["foo", "bar"])
+    }
     
     // SUCCESS: no timeout, no error
     func testArrayOfThreeElementsPublishesTwoFirstElementsWithoutError() throws {
@@ -360,6 +417,17 @@ class DocumentationTests: FailureTestCase {
     }
     
     // MARK: - Recording
+    
+    // SUCCESS: no error
+    func testArrayPublisherSynchronousRecording() throws {
+        let publisher = ["foo", "bar", "baz"].publisher
+        let recorder = publisher.record()
+        let recording = try recorder.recording.get()
+        XCTAssertEqual(recording.output, ["foo", "bar", "baz"])
+        if case let .failure(error) = recording.completion {
+            XCTFail("Unexpected error \(error)")
+        }
+    }
     
     // SUCCESS: no timeout, no error
     func testArrayPublisherRecording() throws {
