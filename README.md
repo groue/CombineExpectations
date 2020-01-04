@@ -41,7 +41,7 @@ class PublisherTests: XCTestCase {
         let recorder = publisher.record()
         
         // 3. Wait for a publisher expectation
-        let elements = try wait(for: recorder.elements, timeout: 1, description: "Elements")
+        let elements = try wait(for: recorder.elements, timeout: ..., description: "Elements")
         
         // 4. Test the result of the expectation
         XCTAssertEqual(elements, ["Hello", "World!"])
@@ -169,7 +169,7 @@ Example:
 func testArrayPublisherCompletesWithSuccess() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    let completion = try wait(for: recorder.completion, timeout: 1)
+    let completion = try wait(for: recorder.completion, timeout: ...)
     if case let .failure(error) = completion {
         XCTFail("Unexpected error \(error)")
     }
@@ -195,7 +195,7 @@ func testArrayPublisherSynchronouslyCompletesWithSuccess() throws {
 func testCompletionTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    let completion = try wait(for: recorder.completion, timeout: 1)
+    let completion = try wait(for: recorder.completion, timeout: ...)
 }
 ```
 
@@ -221,7 +221,7 @@ Example:
 func testArrayPublisherPublishesArrayElements() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    let elements = try wait(for: recorder.elements, timeout: 1)
+    let elements = try wait(for: recorder.elements, timeout: ...)
     XCTAssertEqual(elements, ["foo", "bar", "baz"])
 }
 
@@ -243,7 +243,7 @@ func testArrayPublisherSynchronouslyPublishesArrayElements() throws {
 func testElementsTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    let elements = try wait(for: recorder.elements, timeout: 1)
+    let elements = try wait(for: recorder.elements, timeout: ...)
 }
     
 // FAIL: Caught error MyError
@@ -251,7 +251,7 @@ func testElementsError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    let elements = try wait(for: recorder.elements, timeout: 1)
+    let elements = try wait(for: recorder.elements, timeout: ...)
 }
 ```
 
@@ -275,7 +275,7 @@ Example:
 func testArrayPublisherFinishesWithoutError() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    try wait(for: recorder.finished, timeout: 1)
+    try wait(for: recorder.finished, timeout: ...)
 }
 
 // SUCCESS: no error
@@ -294,7 +294,7 @@ func testArrayPublisherSynchronouslyFinishesWithoutError() throws {
 func testFinishedTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    try wait(for: recorder.finished, timeout: 1)
+    try wait(for: recorder.finished, timeout: ...)
 }
     
 // FAIL: Caught error MyError
@@ -302,7 +302,7 @@ func testFinishedError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    try wait(for: recorder.finished, timeout: 1)
+    try wait(for: recorder.finished, timeout: ...)
 }
 ```
 
@@ -315,7 +315,7 @@ func testFinishedError() throws {
 func testPassthroughSubjectDoesNotFinish() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    try wait(for: recorder.finished.inverted, timeout: 1)
+    try wait(for: recorder.finished.inverted, timeout: ...)
 }
 ```
 
@@ -329,7 +329,7 @@ func testInvertedFinishedError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    try wait(for: recorder.finished.inverted, timeout: 1)
+    try wait(for: recorder.finished.inverted, timeout: ...)
 }
 ```
 
@@ -355,7 +355,7 @@ Example:
 func testArrayPublisherPublishesLastElementLast() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    if let element = try wait(for: recorder.last, timeout: 1) {
+    if let element = try wait(for: recorder.last, timeout: ...) {
         XCTAssertEqual(element, "baz")
     } else {
         XCTFail("Expected one element")
@@ -383,7 +383,7 @@ func testArrayPublisherSynchronouslyPublishesLastElementLast() throws {
 func testLastTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    let element = try wait(for: recorder.last, timeout: 1)
+    let element = try wait(for: recorder.last, timeout: ...)
 }
     
 // FAIL: Caught error MyError
@@ -391,7 +391,7 @@ func testLastError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    let element = try wait(for: recorder.last, timeout: 1)
+    let element = try wait(for: recorder.last, timeout: ...)
 }
 ```
 
@@ -418,10 +418,10 @@ func testArrayOfTwoElementsPublishesElementsInOrder() throws {
     let publisher = ["foo", "bar"].publisher
     let recorder = publisher.record()
     
-    var element = try wait(for: recorder.next(), timeout: 1)
+    var element = try wait(for: recorder.next(), timeout: ...)
     XCTAssertEqual(element, "foo")
     
-    element = try wait(for: recorder.next(), timeout: 1)
+    element = try wait(for: recorder.next(), timeout: ...)
     XCTAssertEqual(element, "bar")
 }
 
@@ -447,7 +447,7 @@ func testArrayOfTwoElementsSynchronouslyPublishesElementsInOrder() throws {
 func testNextTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    let element = try wait(for: recorder.next(), timeout: 1)
+    let element = try wait(for: recorder.next(), timeout: ...)
 }
 
 // FAIL: Caught error MyError
@@ -455,7 +455,7 @@ func testNextError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    let element = try wait(for: recorder.next(), timeout: 1)
+    let element = try wait(for: recorder.next(), timeout: ...)
 }
 
 // FAIL: Caught error RecordingError.notEnoughElements
@@ -463,7 +463,7 @@ func testNextNotEnoughElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send(completion: .finished)
-    let element = try wait(for: recorder.next(), timeout: 1)
+    let element = try wait(for: recorder.next(), timeout: ...)
 }
 ```
 
@@ -476,7 +476,7 @@ func testNextNotEnoughElementsError() throws {
 func testPassthroughSubjectDoesNotPublishAnyElement() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    try wait(for: recorder.next().inverted, timeout: 1)
+    try wait(for: recorder.next().inverted, timeout: ...)
 }
 ```
 
@@ -489,7 +489,7 @@ func testInvertedNextTooEarly() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send("foo")
-    try wait(for: recorder.next().inverted, timeout: 0.1)
+    try wait(for: recorder.next().inverted, timeout: ...)
 }
 
 // FAIL: Fulfilled inverted expectation
@@ -498,7 +498,7 @@ func testInvertedNextError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    try wait(for: recorder.next().inverted, timeout: 0.1)
+    try wait(for: recorder.next().inverted, timeout: ...)
 }
 ```
 
@@ -525,10 +525,10 @@ func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
     
-    var elements = try wait(for: recorder.next(2), timeout: 1)
+    var elements = try wait(for: recorder.next(2), timeout: ...)
     XCTAssertEqual(elements, ["foo", "bar"])
     
-    elements = try wait(for: recorder.next(1), timeout: 1)
+    elements = try wait(for: recorder.next(1), timeout: ...)
     XCTAssertEqual(elements, ["baz"])
 }
 
@@ -555,7 +555,7 @@ func testNextCountTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send("foo")
-    let elements = try wait(for: recorder.next(2), timeout: 1)
+    let elements = try wait(for: recorder.next(2), timeout: ...)
 }
 
 // FAIL: Caught error MyError
@@ -564,7 +564,7 @@ func testNextCountError() throws {
     let recorder = publisher.record()
     publisher.send("foo")
     publisher.send(completion: .failure(MyError()))
-    let elements = try wait(for: recorder.next(2), timeout: 1)
+    let elements = try wait(for: recorder.next(2), timeout: ...)
 }
 
 // FAIL: Caught error RecordingError.notEnoughElements
@@ -573,7 +573,7 @@ func testNextCountNotEnoughElementsError() throws {
     let recorder = publisher.record()
     publisher.send("foo")
     publisher.send(completion: .finished)
-    let elements = try wait(for: recorder.next(2), timeout: 1)
+    let elements = try wait(for: recorder.next(2), timeout: ...)
 }
 ```
 
@@ -599,7 +599,7 @@ Example:
 func testArrayOfThreeElementsPublishesTwoFirstElementsWithoutError() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    let elements = try wait(for: recorder.prefix(2), timeout: 1)
+    let elements = try wait(for: recorder.prefix(2), timeout: ...)
     XCTAssertEqual(elements, ["foo", "bar"])
 }
 
@@ -621,7 +621,7 @@ func testPrefixTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send("foo")
-    let elements = try wait(for: recorder.prefix(2), timeout: 1)
+    let elements = try wait(for: recorder.prefix(2), timeout: ...)
 }
     
 // FAIL: Caught error MyError
@@ -630,7 +630,7 @@ func testPrefixError() throws {
     let recorder = publisher.record()
     publisher.send("foo")
     publisher.send(completion: .failure(MyError()))
-    let elements = try wait(for: recorder.prefix(2), timeout: 1)
+    let elements = try wait(for: recorder.prefix(2), timeout: ...)
 }
 ```
 
@@ -645,7 +645,7 @@ func testPassthroughSubjectPublishesNoMoreThanSentValues() throws {
     let recorder = publisher.record()
     publisher.send("foo")
     publisher.send("bar")
-    let elements = try wait(for: recorder.prefix(3).inverted, timeout: 1)
+    let elements = try wait(for: recorder.prefix(3).inverted, timeout: ...)
     XCTAssertEqual(elements, ["foo", "bar"])
 }
 ```
@@ -661,7 +661,7 @@ func testInvertedPrefixTooEarly() throws {
     publisher.send("foo")
     publisher.send("bar")
     publisher.send("baz")
-    let elements = try wait(for: recorder.prefix(3).inverted, timeout: 1)
+    let elements = try wait(for: recorder.prefix(3).inverted, timeout: ...)
 }
     
 // FAIL: Fulfilled inverted expectation
@@ -671,7 +671,7 @@ func testInvertedPrefixError() throws {
     let recorder = publisher.record()
     publisher.send("foo")
     publisher.send(completion: .failure(MyError()))
-    let elements = try wait(for: recorder.prefix(3).inverted, timeout: 1)
+    let elements = try wait(for: recorder.prefix(3).inverted, timeout: ...)
 }
 ```
 
@@ -697,7 +697,7 @@ Example:
 func testArrayPublisherRecording() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    let recording = try wait(for: recorder.recording, timeout: 1)
+    let recording = try wait(for: recorder.recording, timeout: ...)
     XCTAssertEqual(recording.output, ["foo", "bar", "baz"])
     if case let .failure(error) = recording.completion {
         XCTFail("Unexpected error \(error)")
@@ -725,7 +725,7 @@ func testArrayPublisherSynchronousRecording() throws {
 func testRecordingTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    let recording = try wait(for: recorder.recording, timeout: 1)
+    let recording = try wait(for: recorder.recording, timeout: ...)
 }
 ```
 
@@ -751,7 +751,7 @@ Example:
 func testJustPublishesExactlyOneElement() throws {
     let publisher = Just("foo")
     let recorder = publisher.record()
-    let element = try wait(for: recorder.single, timeout: 1)
+    let element = try wait(for: recorder.single, timeout: ...)
     XCTAssertEqual(element, "foo")
 }
 
@@ -773,7 +773,7 @@ func testJustSynchronouslyPublishesExactlyOneElement() throws {
 func testSingleTimeout() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
-    let element = try wait(for: recorder.single, timeout: 1)
+    let element = try wait(for: recorder.single, timeout: ...)
 }
     
 // FAIL: Caught error MyError
@@ -781,7 +781,7 @@ func testSingleError() throws {
     let publisher = PassthroughSubject<String, MyError>()
     let recorder = publisher.record()
     publisher.send(completion: .failure(MyError()))
-    let element = try wait(for: recorder.single, timeout: 1)
+    let element = try wait(for: recorder.single, timeout: ...)
 }
     
 // FAIL: Caught error RecordingError.tooManyElements
@@ -791,7 +791,7 @@ func testSingleTooManyElementsError() throws {
     publisher.send("foo")
     publisher.send("bar")
     publisher.send(completion: .finished)
-    let element = try wait(for: recorder.single, timeout: 1)
+    let element = try wait(for: recorder.single, timeout: ...)
 }
     
 // FAIL: Caught error RecordingError.notEnoughElements
@@ -799,7 +799,7 @@ func testSingleNotEnoughElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
     let recorder = publisher.record()
     publisher.send(completion: .finished)
-    let element = try wait(for: recorder.single, timeout: 1)
+    let element = try wait(for: recorder.single, timeout: ...)
 }
 ```
 
