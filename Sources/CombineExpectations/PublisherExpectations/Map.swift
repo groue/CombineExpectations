@@ -8,12 +8,12 @@ extension PublisherExpectations {
         let base: Base
         let transform: (Base.Output) throws -> Output
         
-        public func setup(_ expectation: XCTestExpectation) {
-            base.setup(expectation)
+        public func _setup(_ expectation: XCTestExpectation) {
+            base._setup(expectation)
         }
         
-        public func expectedValue() throws -> Output {
-            try transform(base.expectedValue())
+        public func get() throws -> Output {
+            try transform(base.get())
         }
     }
 }
