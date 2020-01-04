@@ -30,9 +30,18 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         }
     }
     
+    /// The recorder state
     private enum State {
+        /// Publisher is not subscribed yet. The recorder may have an
+        /// expectation to fulfill.
         case waitingForSubscription(RecorderExpectation?)
+        
+        /// Publisher is subscribed. The recorder may have an expectation to
+        /// fulfill. It keeps track of all published elements.
         case subscribed(Subscription, RecorderExpectation?, [Input])
+        
+        /// Publisher is completed. The recorder keeps track of all published
+        /// elements and completion.
         case completed([Input], Subscribers.Completion<Failure>)
         
         var elementsAndCompletion: (elements: [Input], completion: Subscribers.Completion<Failure>?) {
