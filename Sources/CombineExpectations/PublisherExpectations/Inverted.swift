@@ -17,13 +17,13 @@ extension PublisherExpectations {
     public struct Inverted<Base: PublisherExpectation>: PublisherExpectation {
         let base: Base
         
-        public func setup(_ expectation: XCTestExpectation) {
-            base.setup(expectation)
+        public func _setup(_ expectation: XCTestExpectation) {
+            base._setup(expectation)
             expectation.isInverted.toggle()
         }
         
-        public func expectedValue() throws -> Base.Output {
-            try base.expectedValue()
+        public func get() throws -> Base.Output {
+            try base.get()
         }
     }
 }
