@@ -5,12 +5,15 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.4.0](#040)
 - [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
 
 
-## Next Release
+## 0.4.0
+
+Released January 4, 2020 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.3.0...v0.4.0)
 
 - [#6](https://github.com/groue/CombineExpectations/pull/6): Support for synchronous tests
 
