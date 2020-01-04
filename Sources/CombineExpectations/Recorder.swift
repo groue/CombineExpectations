@@ -45,6 +45,15 @@ public class Recorder<Input, Failure: Error>: Subscriber {
                 return (elements: elements, completion: completion)
             }
         }
+        
+        var recordedExpectation: RecorderExpectation? {
+            switch self {
+            case let .waitingForSubscription(exp), let .subscribed(_, exp, _):
+                return exp
+            case .completed:
+                return nil
+            }
+        }
     }
     
     private let lock = NSLock()
@@ -77,14 +86,14 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     
     func fulfillOnInput(_ expectation: XCTestExpectation, includingConsumed: Bool) {
         synchronized {
+            preconditionCanFulfillExpectation()
+            
             switch state {
-            case let .waitingForSubscription(exp):
-                preconditionNotWaiting(for: exp)
+            case .waitingForSubscription:
                 let exp = RecorderExpectation.onInput(expectation, remainingCount: expectation.expectedFulfillmentCount)
                 state = .waitingForSubscription(exp)
                 
-            case let .subscribed(subscription, exp, elements):
-                preconditionNotWaiting(for: exp)
+            case let .subscribed(subscription, _, elements):
                 let fulfillmentCount: Int
                 if includingConsumed {
                     fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
@@ -107,14 +116,14 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     
     func fulfillOnCompletion(_ expectation: XCTestExpectation) {
         synchronized {
+            preconditionCanFulfillExpectation()
+            
             switch state {
-            case let .waitingForSubscription(exp):
-                preconditionNotWaiting(for: exp)
+            case .waitingForSubscription:
                 let exp = RecorderExpectation.onCompletion(expectation)
                 state = .waitingForSubscription(exp)
                 
-            case let .subscribed(subscription, exp, elements):
-                preconditionNotWaiting(for: exp)
+            case let .subscribed(subscription, _, elements):
                 let exp = RecorderExpectation.onCompletion(expectation)
                 state = .subscribed(subscription, exp, elements)
                 
@@ -152,10 +161,15 @@ public class Recorder<Input, Failure: Error>: Subscriber {
         }
     }
     
-    // Recorder can fulfill a single expectation. When it is asked to fulfill
-    // another one, we have to check for programmer errors.
-    private func preconditionNotWaiting(for recorderExpectation: RecorderExpectation?) {
-        if let exp = recorderExpectation {
+    /// Checks that recorder can fulfill an expectation.
+    ///
+    /// The reason this method exists is that a recorder can fulfill a single
+    /// expectation at a given time. It is a programmer error to wait for two
+    /// expectations concurrently.
+    ///
+    /// This method MUST be called within a synchronized block.
+    private func preconditionCanFulfillExpectation() {
+        if let exp = state.recordedExpectation {
             // We are already waiting for an expectation! Is it a programmer
             // error? Recorder drops references to non-inverted expectations
             // when they are fulfilled. But inverted expectations are not
