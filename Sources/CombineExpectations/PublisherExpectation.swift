@@ -3,6 +3,14 @@ import XCTest
 /// A name space for publisher expectations
 public enum PublisherExpectations { }
 
+/// The base protocol for PublisherExpectation. It is an implementation detail
+/// that you are not supposed to use, as shown by the underscore prefix.
+public protocol _PublisherExpectationBase {
+    /// Sets up an XCTestExpectation. This method is an implementation detail
+    /// that you are not supposed to use, as shown by the underscore prefix.
+    func _setup(_ expectation: XCTestExpectation)
+}
+
 /// The protocol for publisher expectations.
 ///
 /// You can build publisher expectations from Recorder returned by the
@@ -38,14 +46,11 @@ public enum PublisherExpectations { }
 ///         let elements = try recorder.elements.get()
 ///         XCTAssertEqual(elements, ["foo", "bar", "baz"])
 ///     }
-public protocol PublisherExpectation {
+public protocol PublisherExpectation: _PublisherExpectationBase {
+    /// The type of the expected value.
     associatedtype Output
     
-    /// Sets up an XCTestExpectation. This method is an implementation detail
-    /// that you are not supposed to use, as shown by the prefix underscore.
-    func _setup(_ expectation: XCTestExpectation)
-    
-    /// Returns the expected output, or throws an error if the
+    /// Returns the expected value, or throws an error if the
     /// expectation fails.
     ///
     /// For example:
