@@ -84,36 +84,48 @@ public class Recorder<Input, Failure: Error>: Subscriber {
     
     // MARK: - PublisherExpectation API
     
+    /// Registers the expectation so that it gets fulfilled when publisher
+    /// publishes elements or completes.
+    ///
+    /// - parameter expectation: An XCTestExpectation.
+    /// - parameter includingConsumed: This flag controls how elements that were
+    ///   already published at the time this method is called fulfill the
+    ///   expectation. If true, all published elements fulfill the expectation.
+    ///   If false, only published elements that are not consumed yet fulfill
+    ///   the expectation. For example, the Prefix expectation uses true, but
+    ///   the NextOne expectation uses false.
     func fulfillOnInput(_ expectation: XCTestExpectation, includingConsumed: Bool) {
         synchronized {
             preconditionCanFulfillExpectation()
             
+            let expectedFulfillmentCount = expectation.expectedFulfillmentCount
+            
             switch state {
             case .waitingForSubscription:
-                let exp = RecorderExpectation.onInput(expectation, remainingCount: expectation.expectedFulfillmentCount)
+                let exp = RecorderExpectation.onInput(expectation, remainingCount: expectedFulfillmentCount)
                 state = .waitingForSubscription(exp)
                 
             case let .subscribed(subscription, _, elements):
-                let fulfillmentCount: Int
-                if includingConsumed {
-                    fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count)
-                } else {
-                    fulfillmentCount = min(expectation.expectedFulfillmentCount, elements.count - consumedCount)
-                }
+                let maxFulfillmentCount = includingConsumed
+                    ? elements.count
+                    : elements.count - consumedCount
+                let fulfillmentCount = min(expectedFulfillmentCount, maxFulfillmentCount)
                 expectation.fulfill(count: fulfillmentCount)
                 
-                let remainingCount = expectation.expectedFulfillmentCount - fulfillmentCount
+                let remainingCount = expectedFulfillmentCount - fulfillmentCount
                 if remainingCount > 0 {
                     let exp = RecorderExpectation.onInput(expectation, remainingCount: remainingCount)
                     state = .subscribed(subscription, exp, elements)
                 }
                 
             case .completed:
-                expectation.fulfill(count: expectation.expectedFulfillmentCount)
+                expectation.fulfill(count: expectedFulfillmentCount)
             }
         }
     }
     
+    /// Registers the expectation so that it gets fulfilled when
+    /// publisher completes.
     func fulfillOnCompletion(_ expectation: XCTestExpectation) {
         synchronized {
             preconditionCanFulfillExpectation()
