@@ -47,7 +47,7 @@ extension PublisherExpectations {
         ///         element = try recorder.next().get()
         ///         XCTAssertEqual(element, "bar")
         ///     }
-        public func get() throws -> Input? {
+        public func get() throws -> Input {
             try recorder.value { (_, completion, remainingElements, consume) in
                 if let next = remainingElements.first {
                     consume(1)
