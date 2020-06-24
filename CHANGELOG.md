@@ -5,11 +5,18 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.5.0](#050)
 - [0.4.0](#040)
 - [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
 
+
+## 0.5.0
+
+Released June 24, 2020 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.4.0...v0.5.0)
+
+- **Fixed**: `next().get()` no longer returns an optional.
 
 ## 0.4.0
 
