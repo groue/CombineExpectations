@@ -14,9 +14,10 @@ All notable changes to this project will be documented in this file.
 
 ## 0.5.0
 
-Released June 24, 2020 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.4.0...v0.5.0)
+Released June 25, 2020 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.4.0...v0.5.0)
 
 - **Fixed**: `next().get()` no longer returns an optional.
+- **New**: Support for Xcode 12
 
 ## 0.4.0
 
