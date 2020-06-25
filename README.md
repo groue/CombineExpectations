@@ -6,7 +6,7 @@
 
 **Latest release**: [version 0.5.0](https://github.com/groue/CombineExpectations/tree/v0.4.0) (June 25, 2020) • [Release Notes]
 
-**Requirements**: iOS 13.0+ / macOS 10.15+ / watchOS 6.0+ &bull; Swift 5.1+ / Xcode 11.0+
+**Requirements**: iOS 13.0+ / macOS 10.15+ / tvOS 13.0+ &bull; Swift 5.1+ / Xcode 11.0+
 
 **Contact**: Report bugs and ask questions in [Github issues](https://github.com/groue/CombineExpectations/issues).
 
