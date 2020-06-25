@@ -3,17 +3,52 @@ import XCTest
 /// A XCTestCase subclass that can test its own failures.
 class FailureTestCase: XCTestCase {
     private struct Failure: Hashable {
-        var prefix: String
+        #if compiler(>=5.3)
+        let issue: XCTIssue
+        #else
+        var description: String
         var file: String
         var line: Int
         var expected: Bool
+        #endif
+        
+        #if compiler(>=5.3)
+        func issue(prefix: String = "") -> XCTIssue {
+            if prefix.isEmpty {
+                return issue
+            } else {
+                return XCTIssue(
+                    type: issue.type,
+                    compactDescription: "\(prefix): \(issue.compactDescription)",
+                    detailedDescription: issue.detailedDescription,
+                    sourceCodeContext: issue.sourceCodeContext,
+                    associatedError: issue.associatedError,
+                    attachments: issue.attachments)
+            }
+        }
+        #else
+        func failure(prefix: String = "") -> (description: String, file: String, line: Int, expected: Bool) {
+            let prefix = prefix.isEmpty ? "" : "\(prefix): "
+            return (
+                description: prefix + description,
+                file: file,
+                line: line,
+                expected: expected)
+        }
+        #endif
+        
+        #if compiler(>=5.3)
+        private var description: String {
+            return issue.compactDescription
+        }
+        #endif
         
         func hash(into hasher: inout Hasher) {
             hasher.combine(0)
         }
         
         static func == (lhs: Failure, rhs: Failure) -> Bool {
-            lhs.prefix.hasPrefix(rhs.prefix) || rhs.prefix.hasPrefix(lhs.prefix)
+            lhs.description.hasPrefix(rhs.description) || rhs.description.hasPrefix(lhs.description)
         }
     }
     
@@ -24,14 +59,46 @@ class FailureTestCase: XCTestCase {
         let recordedFailures = try recordingFailures(execute)
         if prefixes.isEmpty {
             if recordedFailures.isEmpty {
+                #if compiler(>=5.3)
+                record(XCTIssue(
+                        type: .assertionFailure,
+                        compactDescription: "No failure did happen",
+                        detailedDescription: nil,
+                        sourceCodeContext: XCTSourceCodeContext(
+                            location: XCTSourceCodeLocation(
+                                filePath: String(describing: file),
+                                lineNumber: Int(line))),
+                        associatedError: nil,
+                        attachments: []))
+                #else
                 recordFailure(
                     withDescription: "No failure did happen",
                     inFile: file.description,
                     atLine: Int(line),
                     expected: true)
+                #endif
             }
         } else {
-            let expectedFailures = prefixes.map { Failure(prefix: $0, file: file.description, line: Int(line), expected: true) }
+            let expectedFailures = prefixes.map { prefix -> Failure in
+                #if compiler(>=5.3)
+                return Failure(issue: XCTIssue(
+                                type: .assertionFailure,
+                                compactDescription: prefix,
+                                detailedDescription: nil,
+                                sourceCodeContext: XCTSourceCodeContext(
+                                    location: XCTSourceCodeLocation(
+                                        filePath: String(describing: file),
+                                        lineNumber: Int(line))),
+                                associatedError: nil,
+                                attachments: []))
+                #else
+                return Failure(
+                    description: prefix,
+                    file: String(describing: file),
+                    line: Int(line),
+                    expected: true)
+                #endif
+            }
             assertMatch(
                 recordedFailures: recordedFailures,
                 expectedFailures: expectedFailures)
@@ -44,13 +111,31 @@ class FailureTestCase: XCTestCase {
         recordedFailures = []
     }
     
-    override func recordFailure(withDescription description: String, inFile filePath: String, atLine lineNumber: Int, expected: Bool) {
+    #if compiler(>=5.3)
+    override func record(_ issue: XCTIssue) {
         if isRecordingFailures {
-            recordedFailures.append(Failure(prefix: description, file: filePath, line: lineNumber, expected: expected))
+            recordedFailures.append(Failure(issue: issue))
         } else {
-            super.recordFailure(withDescription: description, inFile: filePath, atLine: lineNumber, expected: expected)
+            super.record(issue)
         }
     }
+    #else
+    override func recordFailure(withDescription description: String, inFile filePath: String, atLine lineNumber: Int, expected: Bool) {
+        if isRecordingFailures {
+            recordedFailures.append(Failure(
+                                        description: description,
+                                        file: filePath,
+                                        line: lineNumber,
+                                        expected: expected))
+        } else {
+            super.recordFailure(
+                withDescription: description,
+                inFile: filePath,
+                atLine: lineNumber,
+                expected: expected)
+        }
+    }
+    #endif
     
     private func recordingFailures(_ execute: () throws -> Void) rethrows -> [Failure] {
         let oldRecordingFailures = isRecordingFailures
@@ -71,25 +156,37 @@ class FailureTestCase: XCTestCase {
         for change in diff {
             switch change {
             case let .insert(offset: _, element: failure, associatedWith: nil):
+                #if compiler(>=5.3)
+                record(failure.issue(prefix: "Failure did not happen"))
+                #else
+                let failure = failure.failure(prefix: "Failure did not happen")
                 recordFailure(
-                    withDescription: "Failure did not happen: \(failure.prefix)",
+                    withDescription: failure.description,
                     inFile: failure.file,
                     atLine: failure.line,
                     expected: failure.expected)
+                #endif
             case let .remove(offset: _, element: failure, associatedWith: nil):
+                #if compiler(>=5.3)
+                record(failure.issue())
+                #else
+                let failure = failure.failure()
                 recordFailure(
-                    withDescription: failure.prefix,
+                    withDescription: failure.description,
                     inFile: failure.file,
                     atLine: failure.line,
                     expected: failure.expected)
+                #endif
             default:
                 break
             }
         }
     }
-    
-    // MARK: - Tests
-    
+}
+
+// MARK: - Tests
+
+class FailureTestCaseTests: FailureTestCase {
     func testEmptyTest() {
     }
     
