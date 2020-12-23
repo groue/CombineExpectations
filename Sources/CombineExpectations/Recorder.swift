@@ -288,17 +288,27 @@ extension PublisherExpectations {
 }
 
 extension Recorder {
-    /// Returns a publisher expectation which waits for the timeout to expire.
+    /// Returns a publisher expectation which waits for the timeout to expire,
+    /// or the recorded publisher to complete.
     ///
-    /// When waiting for this expectation, the publisher error is thrown if the
-    /// publisher fails before expiration.
+    /// When waiting for this expectation, the publisher error is thrown if
+    /// the publisher fails before the expectation has expired.
     ///
     /// Otherwise, an array of all elements published before the expectation
     /// has expired is returned.
     ///
+    /// Unlike other expectations, `availableElements` does not make a test fail
+    /// on timeout expiration. It just returns the elements published so far.
+    ///
     /// For example:
     ///
-    ///     // TODO
+    ///     // SUCCESS: no timeout, no error
+    ///     func testTimerPublishesIncreasingDates() throws {
+    ///         let publisher = Timer.publish(every: 0.01, on: .main, in: .common).autoconnect()
+    ///         let recorder = publisher.record()
+    ///         let dates = try wait(for: recorder.availableElements, timeout: ...)
+    ///         XCTAssertEqual(dates.sorted(), dates)
+    ///     }
     public var availableElements: PublisherExpectations.AvailableElements<Input, Failure> {
         PublisherExpectations.AvailableElements(recorder: self)
     }

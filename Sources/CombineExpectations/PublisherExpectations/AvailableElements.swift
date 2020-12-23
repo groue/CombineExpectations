@@ -5,10 +5,13 @@ extension PublisherExpectations {
     /// the recorded publisher to complete.
     ///
     /// When waiting for this expectation, the publisher error is thrown if
-    /// the publisher fails before the expectation has expired..
+    /// the publisher fails before the expectation has expired.
     ///
     /// Otherwise, an array of all elements published before the expectation
     /// has expired is returned.
+    ///
+    /// Unlike other expectations, `AvailableElements` does not make a test fail
+    /// on timeout expiration. It just returns the elements published so far.
     ///
     /// For example:
     ///

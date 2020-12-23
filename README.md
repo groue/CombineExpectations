@@ -160,6 +160,8 @@ There are various publisher expectations. Each one waits for a specific publishe
 
 :arrow_right: Related expectations: [elements], [prefix(maxLength)].
 
+Unlike other expectations, `availableElements` does not make a test fail on timeout expiration. It just returns the elements published so far.
+
 Example:
 
 ```swift
