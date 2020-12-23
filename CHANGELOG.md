@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.6.0](#060)
 - [0.5.0](#050)
 - [0.4.0](#040)
 - [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
 
+## 0.6.0
+
+Released December 23, 2020 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.5.0...v0.6.0)
+
+- **New**: [#11](https://github.com/groue/CombineExpectations/pull/11): `availableElements` expectation (fixes [#8](https://github.com/groue/CombineExpectations/issues/8)).
 
 ## 0.5.0
 
