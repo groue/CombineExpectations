@@ -11,6 +11,9 @@ All notable changes to this project will be documented in this file.
 - [0.2.0](#020)
 - [0.1.0](#010)
 
+## Development Branch
+
+- **New**: `availableElements` expectation
 
 ## 0.5.0
 
