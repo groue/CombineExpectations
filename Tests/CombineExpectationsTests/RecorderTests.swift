@@ -16,6 +16,59 @@ class RecorderTests: XCTestCase {
         XCTAssertTrue(subscribed)
     }
     
+    // MARK: - availableElements
+    
+    func testAvailableElementsSync() throws {
+        do {
+            let publisher = [1, 2, 3].publisher
+            let recorder = publisher.record()
+            let availableElements = try recorder.availableElements.get()
+            XCTAssertEqual(availableElements, [1, 2, 3])
+        }
+        do {
+            let publisher = PassthroughSubject<Int, Never>()
+            let recorder = publisher.record()
+            publisher.send(1)
+            publisher.send(2)
+            publisher.send(3)
+            let availableElements = try recorder.availableElements.get()
+            XCTAssertEqual(availableElements, [1, 2, 3])
+        }
+        do {
+            let publisher = PassthroughSubject<Int, TestError>()
+            let recorder = publisher.record()
+            publisher.send(1)
+            publisher.send(completion: .failure(TestError()))
+            _ = try recorder.availableElements.get()
+            XCTFail("Expected TestError")
+        } catch is TestError { }
+    }
+    
+    func testAvailableElementsAsync() throws {
+        do {
+            let publisher = Timer.publish(every: 0.01, on: .main, in: .common).autoconnect()
+            let recorder = publisher.record()
+            let dates = try wait(for: recorder.availableElements, timeout: 0.1)
+            XCTAssertTrue(dates.count > 2)
+            XCTAssertEqual(dates.sorted(), dates)
+        }
+    }
+    
+    func testAvailableElementsStopsOnPublisherCompletion() throws {
+        do {
+            let publisher = PassthroughSubject<Int, TestError>()
+            let recorder = publisher.record()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                publisher.send(completion: .finished)
+            }
+            let start = Date()
+            _ = try wait(for: recorder.availableElements, timeout: 2)
+            let duration = Date().timeIntervalSince(start)
+            XCTAssertLessThan(duration, 1)
+        }
+    }
+    
     // MARK: - elementsAndCompletion
     
     func testElementsAndCompletionSync() throws {

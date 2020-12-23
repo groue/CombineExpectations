@@ -18,7 +18,7 @@ CombineExpectations aims at streamlining those tests. It defines an XCTestCase m
 
 - [Usage]
 - [Installation]
-- [Publisher Expectations]: [completion], [elements], [finished], [last], [next()], [next(count)], [prefix(maxLength)], [recording], [single]
+- [Publisher Expectations]: [availableElements], [completion], [elements], [finished], [last], [next()], [next(count)], [prefix(maxLength)], [recording], [single]
 
 ---
 
@@ -112,7 +112,6 @@ class PublisherTests: XCTestCase {
 ```
 
 
-
 ## Installation
 
 Add a dependency for CombineExpectations to your [Swift Package](https://swift.org/package-manager/) test targets:
@@ -138,6 +137,7 @@ Add a dependency for CombineExpectations to your [Swift Package](https://swift.o
 
 There are various publisher expectations. Each one waits for a specific publisher aspect:
 
+- [availableElements]: all published elements until timeout expiration
 - [completion]: the publisher completion
 - [elements]: all published elements until successful completion
 - [finished]: the publisher successful completion
@@ -149,6 +149,30 @@ There are various publisher expectations. Each one waits for a specific publishe
 - [single]: the one and only published element
 
 ---
+
+### availableElements
+
+:clock230: `recorder.availableElements` waits for the expectation to expire, or the recorded publisher to complete.
+
+:x: When waiting for this expectation, the publisher error is thrown if the publisher fails before the expectation has expired.
+
+:white_check_mark: Otherwise, an array of all elements published before the expectation has expired is returned.
+
+:arrow_right: Related expectations: [elements], [prefix(maxLength)].
+
+Unlike other expectations, `availableElements` does not make a test fail on timeout expiration. It just returns the elements published so far.
+
+Example:
+
+```swift
+// SUCCESS: no timeout, no error
+func testTimerPublishesIncreasingDates() throws {
+    let publisher = Timer.publish(every: 0.01, on: .main, in: .common).autoconnect()
+    let recorder = publisher.record()
+    let dates = try wait(for: recorder.availableElements, timeout: ...)
+    XCTAssertEqual(dates.sorted(), dates)
+}
+```
 
 ### completion
 
@@ -210,7 +234,7 @@ func testCompletionTimeout() throws {
 
 :white_check_mark: Otherwise, an array of published elements is returned.
 
-:arrow_right: Related expectations: [last], [prefix(maxLength)], [recording], [single].
+:arrow_right: Related expectations: [availableElements], [last], [prefix(maxLength)], [recording], [single].
 
 Example:
 
@@ -588,7 +612,7 @@ func testNextCountNotEnoughElementsError() throws {
 
 :white_check_mark: Otherwise, an array of received elements is returned, containing at most `maxLength` elements, or less if the publisher completes early.
 
-:arrow_right: Related expectations: [elements], [next(count)].
+:arrow_right: Related expectations: [availableElements], [elements], [next(count)].
 
 Example:
 
@@ -817,3 +841,4 @@ func testSingleNotEnoughElementsError() throws {
 [elements]: #elements
 [last]: #last
 [single]: #single
+[availableElements]: #availableElements
