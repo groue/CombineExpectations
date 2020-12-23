@@ -156,7 +156,7 @@ There are various publisher expectations. Each one waits for a specific publishe
 
 :x: When waiting for this expectation, the publisher error is thrown if the publisher fails before the expectation has expired.
 
-:white_check_mark: Otherwise, an array of all elements published before the expectation has expired elements is returned.
+:white_check_mark: Otherwise, an array of all elements published before the expectation has expired is returned.
 
 :arrow_right: Related expectations: [elements], [prefix(maxLength)].
 

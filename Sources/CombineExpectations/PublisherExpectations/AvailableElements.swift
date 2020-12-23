@@ -8,7 +8,7 @@ extension PublisherExpectations {
     /// the publisher fails before the expectation has expired..
     ///
     /// Otherwise, an array of all elements published before the expectation
-    /// has expired elements is returned.
+    /// has expired is returned.
     ///
     /// For example:
     ///

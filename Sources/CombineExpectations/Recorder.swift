@@ -294,7 +294,7 @@ extension Recorder {
     /// publisher fails before expiration.
     ///
     /// Otherwise, an array of all elements published before the expectation
-    /// has expired elements is returned.
+    /// has expired is returned.
     ///
     /// For example:
     ///
