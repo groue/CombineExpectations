@@ -274,20 +274,35 @@ public class Recorder<Input, Failure: Error>: Subscriber {
 // MARK: - Publisher Expectations
 
 extension PublisherExpectations {
-    /// The type of the publisher expectation returned by Recorder.completion
+    /// The type of the publisher expectation returned by `Recorder.completion`.
     public typealias Completion<Input, Failure: Error> = Map<Recording<Input, Failure>, Subscribers.Completion<Failure>>
     
-    /// The type of the publisher expectation returned by Recorder.elements
+    /// The type of the publisher expectation returned by `Recorder.elements`.
     public typealias Elements<Input, Failure: Error> = Map<Recording<Input, Failure>, [Input]>
     
-    /// The type of the publisher expectation returned by Recorder.last
+    /// The type of the publisher expectation returned by `Recorder.last`.
     public typealias Last<Input, Failure: Error> = Map<Elements<Input, Failure>, Input?>
     
-    /// The type of the publisher expectation returned by Recorder.single
+    /// The type of the publisher expectation returned by `Recorder.single`.
     public typealias Single<Input, Failure: Error> = Map<Elements<Input, Failure>, Input>
 }
 
 extension Recorder {
+    /// Returns a publisher expectation which waits for the timeout to expire.
+    ///
+    /// When waiting for this expectation, the publisher error is thrown if the
+    /// publisher fails before expiration.
+    ///
+    /// Otherwise, an array of all elements published before the expectation
+    /// has expired elements is returned.
+    ///
+    /// For example:
+    ///
+    ///     // TODO
+    public var availableElements: PublisherExpectations.AvailableElements<Input, Failure> {
+        PublisherExpectations.AvailableElements(recorder: self)
+    }
+    
     /// Returns a publisher expectation which waits for the recorded publisher
     /// to complete.
     ///
