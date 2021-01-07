@@ -7,7 +7,6 @@ Pod::Spec.new do |s|
   s.homepage = 'https://github.com/groue/CombineExpectations'
   s.author   = { 'Gwendal Roué' => 'gr@pierlis.com' }
   s.source   = { :git => 'https://github.com/groue/CombineExpectations.git', :tag => "v#{s.version}" }
-  s.module_name = 'GRDBCombine'
   
   s.swift_versions = ['5.2']
   s.ios.deployment_target = '13.0'
