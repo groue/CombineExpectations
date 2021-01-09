@@ -5,12 +5,19 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.7.0](#070)
 - [0.6.0](#060)
 - [0.5.0](#050)
 - [0.4.0](#040)
 - [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
+
+## 0.7.0
+
+Released January 9, 2021 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.6.0...v0.7.0)
+
+- **Fixed**: [#13](https://github.com/groue/CombineExpectations/pull/13) by [@chrisballinger](https://github.com/chrisballinger): Remove module_name override in CocoaPods spec
 
 ## 0.6.0
 

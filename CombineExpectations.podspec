@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name     = 'CombineExpectations'
-  s.version  = '0.6.0'
+  s.version  = '0.7.0'
   
   s.license  = { :type => 'MIT', :file => 'LICENSE' }
   s.summary  = 'A set of extensions for SQLite, GRDB.swift, and Combine'
