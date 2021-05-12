@@ -15,4 +15,7 @@ Pod::Spec.new do |s|
   
   s.frameworks = ['Combine', 'XCTest']
   s.source_files = 'Sources/CombineExpectations/**/*.swift'
+  s.pod_target_xcconfig = {
+    "ENABLE_TESTING_SEARCH_PATHS" => "YES" # Required for Xcode 12.5
+  }
 end
