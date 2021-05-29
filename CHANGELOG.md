@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.8.0](#080)
 - [0.7.0](#070)
 - [0.6.0](#060)
 - [0.5.0](#050)
@@ -12,6 +13,12 @@ All notable changes to this project will be documented in this file.
 - [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
+
+## 0.8.0
+
+Released May 29, 2021 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.7.0...v0.8.0)
+
+- **Fixed**: [#15](https://github.com/groue/CombineExpectations/pull/15) by [@chrisballinger](https://github.com/chrisballinger): Fix XCTFail not found issue with Xcode 12.5
 
 ## 0.7.0
 
