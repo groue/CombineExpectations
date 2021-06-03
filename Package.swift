@@ -6,9 +6,9 @@ import PackageDescription
 let package = Package(
     name: "CombineExpectations",
     platforms: [
-        .iOS("13.0"),
-        .macOS("10.15"),
-        .tvOS("13.0"),
+        .iOS(.v13),
+        .macOS(.v10_15),
+        .tvOS(.v13),
     ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
@@ -35,6 +35,6 @@ let package = Package(
 #if swift(>=5.4)
   // XCTest was introduced for watchOS with Swift 5.4 and Xcode 12.5.
   package.platforms! += [
-    .watchOS("6.0")
+    .watchOS(.v6)
   ]
 #endif
