@@ -31,3 +31,10 @@ let package = Package(
             dependencies: ["CombineExpectations"]),
     ]
 )
+
+#if swift(>=5.4)
+  // XCTest was introduced for watchOS with Swift 5.4 and Xcode 12.5.
+  package.platforms! += [
+    .watchOS("6.0")
+  ]
+#endif
