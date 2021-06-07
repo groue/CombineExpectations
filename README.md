@@ -4,7 +4,7 @@
 
 ---
 
-**Latest release**: [version 0.8.0](https://github.com/groue/CombineExpectations/tree/v0.8.0) (May 29, 2021) • [Release Notes]
+**Latest release**: [version 0.9.0](https://github.com/groue/CombineExpectations/tree/v0.9.0) (June 7, 2021) • [Release Notes]
 
 **Requirements**: iOS 13+, macOS 10.15+, and tvOS 13+ require Swift 5.2+ or Xcode 11.4+. watchOS 6+ requires Swift 5.4+ or Xcode 12.5+.
 

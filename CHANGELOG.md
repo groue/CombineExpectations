@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.9.0](#090)
 - [0.8.0](#080)
 - [0.7.0](#070)
 - [0.6.0](#060)
@@ -13,6 +14,12 @@ All notable changes to this project will be documented in this file.
 - [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
+
+## 0.9.0
+
+Released June 7, 2021 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.8.0...v0.9.0)
+
+- **New**: [#16](https://github.com/groue/CombineExpectations/pull/16) by [@chris-araman](https://github.com/chris-araman): Support watchOS 6 or later when building with Swift 5.4 or later
 
 ## 0.8.0
 
