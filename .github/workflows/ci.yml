@@ -14,9 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TODO: Add 5.1 in #17.
         # TODO: Add watchOS, 5.4 and 5.5 once @groue has access to macos-11 runners.
-        swift: ['5.2', '5.3']
+        swift: ['5.1', '5.2', '5.3']
         platform: [macOS, iOS, tvOS]
     steps:
     - name: Clone
