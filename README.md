@@ -6,7 +6,7 @@
 
 **Latest release**: [version 0.9.0](https://github.com/groue/CombineExpectations/tree/v0.9.0) (June 7, 2021) • [Release Notes]
 
-**Requirements**: iOS 13+, macOS 10.15+, and tvOS 13+ require Swift 5.2+ or Xcode 11.4+. watchOS 6+ requires Swift 5.4+ or Xcode 12.5+.
+**Requirements**: iOS 13+, macOS 10.15+, and tvOS 13+ require Swift 5.2+ or Xcode 11.3+. watchOS 7.4+ requires Swift 5.4+ or Xcode 12.5+.
 
 **Contact**: Report bugs and ask questions in [Github issues](https://github.com/groue/CombineExpectations/issues).
 
@@ -34,13 +34,13 @@ class PublisherTests: XCTestCase {
     func testElements() throws {
         // 1. Create a publisher
         let publisher = ...
-        
+
         // 2. Start recording the publisher
         let recorder = publisher.record()
-        
+
         // 3. Wait for a publisher expectation
         let elements = try wait(for: recorder.elements, timeout: ..., description: "Elements")
-        
+
         // 4. Test the result of the expectation
         XCTAssertEqual(elements, ["Hello", "World!"])
     }
@@ -60,13 +60,13 @@ class PublisherTests: XCTestCase {
     func testPublisher() throws {
         let publisher = ...
         let recorder = publisher.record()
-        
+
         // Wait for first element
         _ = try wait(for: recorder.next(), timeout: ...)
-        
+
         // Wait for second element
         _ = try wait(for: recorder.next(), timeout: ...)
-        
+
         // Wait for successful completion
         try wait(for: recorder.finished, timeout: ...)
     }
@@ -80,13 +80,13 @@ class PublisherTests: XCTestCase {
     func testSynchronousPublisher() throws {
         // 1. Create a publisher
         let publisher = ...
-        
+
         // 2. Start recording the publisher
         let recorder = publisher.record()
-        
+
         // 3. Grab the expected result
         let elements = try recorder.elements.get()
-        
+
         // 4. Test the result of the expectation
         XCTAssertEqual(elements, ["Hello", "World!"])
     }
@@ -101,10 +101,10 @@ class PublisherTests: XCTestCase {
     func testPassthroughSubjectSynchronouslyPublishesElements() throws {
         let publisher = PassthroughSubject<String, Never>()
         let recorder = publisher.record()
-        
+
         publisher.send("foo")
         try XCTAssertEqual(recorder.next().get(), "foo")
-        
+
         publisher.send("bar")
         try XCTAssertEqual(recorder.next().get(), "bar")
     }
@@ -118,7 +118,7 @@ Add a dependency for CombineExpectations to your [Swift Package](https://swift.o
 
 ```diff
  import PackageDescription
- 
+
  let package = Package(
      dependencies: [
 +        .package(url: "https://github.com/groue/CombineExpectations.git", ...)
@@ -267,7 +267,7 @@ func testElementsTimeout() throws {
     let recorder = publisher.record()
     let elements = try wait(for: recorder.elements, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testElementsError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -318,7 +318,7 @@ func testFinishedTimeout() throws {
     let recorder = publisher.record()
     try wait(for: recorder.finished, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testFinishedError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -407,7 +407,7 @@ func testLastTimeout() throws {
     let recorder = publisher.record()
     let element = try wait(for: recorder.last, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testLastError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -439,10 +439,10 @@ Example:
 func testArrayOfTwoElementsPublishesElementsInOrder() throws {
     let publisher = ["foo", "bar"].publisher
     let recorder = publisher.record()
-    
+
     var element = try wait(for: recorder.next(), timeout: ...)
     XCTAssertEqual(element, "foo")
-    
+
     element = try wait(for: recorder.next(), timeout: ...)
     XCTAssertEqual(element, "bar")
 }
@@ -451,10 +451,10 @@ func testArrayOfTwoElementsPublishesElementsInOrder() throws {
 func testArrayOfTwoElementsSynchronouslyPublishesElementsInOrder() throws {
     let publisher = ["foo", "bar"].publisher
     let recorder = publisher.record()
-    
+
     var element = try recorder.next().get()
     XCTAssertEqual(element, "foo")
-    
+
     element = try recorder.next().get()
     XCTAssertEqual(element, "bar")
 }
@@ -546,10 +546,10 @@ Example:
 func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    
+
     var elements = try wait(for: recorder.next(2), timeout: ...)
     XCTAssertEqual(elements, ["foo", "bar"])
-    
+
     elements = try wait(for: recorder.next(1), timeout: ...)
     XCTAssertEqual(elements, ["baz"])
 }
@@ -558,10 +558,10 @@ func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
 func testArrayOfThreeElementsSynchronouslyPublishesTwoThenOneElement() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-    
+
     var elements = try recorder.next(2).get()
     XCTAssertEqual(elements, ["foo", "bar"])
-    
+
     elements = try recorder.next(1).get()
     XCTAssertEqual(elements, ["baz"])
 }
@@ -645,7 +645,7 @@ func testPrefixTimeout() throws {
     publisher.send("foo")
     let elements = try wait(for: recorder.prefix(2), timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testPrefixError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -675,7 +675,7 @@ func testPassthroughSubjectPublishesNoMoreThanSentValues() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift   
+```swift
 // FAIL: Fulfilled inverted expectation
 func testInvertedPrefixTooEarly() throws {
     let publisher = PassthroughSubject<String, Never>()
@@ -685,7 +685,7 @@ func testInvertedPrefixTooEarly() throws {
     publisher.send("baz")
     let elements = try wait(for: recorder.prefix(3).inverted, timeout: ...)
 }
-    
+
 // FAIL: Fulfilled inverted expectation
 // FAIL: Caught error MyError
 func testInvertedPrefixError() throws {
@@ -797,7 +797,7 @@ func testSingleTimeout() throws {
     let recorder = publisher.record()
     let element = try wait(for: recorder.single, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testSingleError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -805,7 +805,7 @@ func testSingleError() throws {
     publisher.send(completion: .failure(MyError()))
     let element = try wait(for: recorder.single, timeout: ...)
 }
-    
+
 // FAIL: Caught error RecordingError.tooManyElements
 func testSingleTooManyElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
@@ -815,7 +815,7 @@ func testSingleTooManyElementsError() throws {
     publisher.send(completion: .finished)
     let element = try wait(for: recorder.single, timeout: ...)
 }
-    
+
 // FAIL: Caught error RecordingError.notEnoughElements
 func testSingleNotEnoughElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()

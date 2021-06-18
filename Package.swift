@@ -34,8 +34,8 @@ let package = Package(
 )
 
 #if swift(>=5.4)
-  // XCTest was introduced for watchOS with Swift 5.4 and Xcode 12.5.
+  // XCTest was introduced for watchOS with Swift 5.4, Xcode 12.5, and watchOS 7.4.
   package.platforms! += [
-    .watchOS(.v6)
+    .watchOS("7.4")
   ]
 #endif
