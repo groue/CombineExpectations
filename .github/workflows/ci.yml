@@ -1,0 +1,29 @@
+name: Continuous Integration
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-test:
+    name: ${{ matrix.name || 'Build & Test' }} (Swift ${{ matrix.swift }}, ${{ matrix.platform }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # TODO: Add watchOS, 5.4 and 5.5 once @groue has access to macos-11 runners.
+        swift: ['5.1', '5.2', '5.3']
+        platform: [macOS, iOS, tvOS]
+    steps:
+    - name: Clone
+      uses: actions/checkout@v2
+    - name: ${{ matrix.name || 'Build & Test' }}
+      uses: mxcl/xcodebuild@v1
+      with:
+        swift: ~${{ matrix.swift }}
+        platform: ${{ matrix.platform }}
+        action: ${{ matrix.action }}
+        quiet: false
