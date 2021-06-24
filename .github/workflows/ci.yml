@@ -17,18 +17,21 @@ jobs:
       fail-fast: false
       matrix:
         swift: ['5.1', '5.2', '5.3', '5.4', '5.5']
-        platform: [macOS, iOS, tvOS]
+        platform: [macOS, iOS, tvOS, watchOS]
+        exclude:
+          # watchOS requires Swift 5.4 or later.
+          - swift: '5.1'
+            platform: watchOS
+          - swift: '5.2'
+            platform: watchOS
+          - swift: '5.3'
+            platform: watchOS
         include:
           # Swift 5.4 requires macos-11 or later.
           - swift: '5.4'
             macos: '11'
           - swift: '5.5'
             macos: '11'
-          # watchOS requires Swift 5.4 or later.
-          - swift: '5.4'
-            platform: watchOS
-          - swift: '5.5'
-            platform: watchOS
     steps:
     - name: Clone
       uses: actions/checkout@v2
