@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build-test:
-    name: ${{ matrix.name || 'Build & Test' }} (Swift ${{ matrix.swift }}, ${{ matrix.platform }})
+    name: Build & Test (Swift ${{ matrix.swift }}, ${{ matrix.platform }})
     runs-on: macos-${{ matrix.macos || '10.15' }}
     # TODO: Remove this once @groue has access to macos-11.
     continue-on-error: ${{ matrix.macos == '11' }}
@@ -35,9 +35,8 @@ jobs:
     steps:
     - name: Clone
       uses: actions/checkout@v2
-    - name: ${{ matrix.name || 'Build & Test' }}
+    - name: Build & Test
       uses: mxcl/xcodebuild@v1
       with:
         swift: ~${{ matrix.swift }}
         platform: ${{ matrix.platform }}
-        action: ${{ matrix.action }}
