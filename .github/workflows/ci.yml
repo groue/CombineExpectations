@@ -10,9 +10,7 @@ concurrency:
 jobs:
   build-test:
     name: Build & Test (Swift ${{ matrix.swift }}, ${{ matrix.platform }})
-    runs-on: macos-${{ matrix.macos || '10.15' }}
-    # TODO: Remove this once @groue has access to macos-11.
-    continue-on-error: ${{ matrix.macos == '11' }}
+    runs-on: macos-${{ matrix.macos || '11' }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,11 +25,9 @@ jobs:
           - swift: '5.3'
             platform: watchOS
         include:
-          # Swift 5.4 requires macos-11 or later.
-          - swift: '5.4'
-            macos: '11'
-          - swift: '5.5'
-            macos: '11'
+          # The macOS 11 runner no longer includes Swift 5.1.
+          - swift: '5.1'
+            macos: '10.15'
     steps:
     - name: Clone
       uses: actions/checkout@v2
