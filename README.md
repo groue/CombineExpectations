@@ -34,13 +34,13 @@ class PublisherTests: XCTestCase {
     func testElements() throws {
         // 1. Create a publisher
         let publisher = ...
-
+        
         // 2. Start recording the publisher
         let recorder = publisher.record()
-
+        
         // 3. Wait for a publisher expectation
         let elements = try wait(for: recorder.elements, timeout: ..., description: "Elements")
-
+        
         // 4. Test the result of the expectation
         XCTAssertEqual(elements, ["Hello", "World!"])
     }
@@ -60,13 +60,13 @@ class PublisherTests: XCTestCase {
     func testPublisher() throws {
         let publisher = ...
         let recorder = publisher.record()
-
+        
         // Wait for first element
         _ = try wait(for: recorder.next(), timeout: ...)
-
+        
         // Wait for second element
         _ = try wait(for: recorder.next(), timeout: ...)
-
+        
         // Wait for successful completion
         try wait(for: recorder.finished, timeout: ...)
     }
@@ -80,13 +80,13 @@ class PublisherTests: XCTestCase {
     func testSynchronousPublisher() throws {
         // 1. Create a publisher
         let publisher = ...
-
+        
         // 2. Start recording the publisher
         let recorder = publisher.record()
-
+        
         // 3. Grab the expected result
         let elements = try recorder.elements.get()
-
+        
         // 4. Test the result of the expectation
         XCTAssertEqual(elements, ["Hello", "World!"])
     }
@@ -101,10 +101,10 @@ class PublisherTests: XCTestCase {
     func testPassthroughSubjectSynchronouslyPublishesElements() throws {
         let publisher = PassthroughSubject<String, Never>()
         let recorder = publisher.record()
-
+        
         publisher.send("foo")
         try XCTAssertEqual(recorder.next().get(), "foo")
-
+        
         publisher.send("bar")
         try XCTAssertEqual(recorder.next().get(), "bar")
     }
@@ -118,7 +118,7 @@ Add a dependency for CombineExpectations to your [Swift Package](https://swift.o
 
 ```diff
  import PackageDescription
-
+ 
  let package = Package(
      dependencies: [
 +        .package(url: "https://github.com/groue/CombineExpectations.git", ...)
@@ -439,10 +439,10 @@ Example:
 func testArrayOfTwoElementsPublishesElementsInOrder() throws {
     let publisher = ["foo", "bar"].publisher
     let recorder = publisher.record()
-
+    
     var element = try wait(for: recorder.next(), timeout: ...)
     XCTAssertEqual(element, "foo")
-
+    
     element = try wait(for: recorder.next(), timeout: ...)
     XCTAssertEqual(element, "bar")
 }
@@ -451,10 +451,10 @@ func testArrayOfTwoElementsPublishesElementsInOrder() throws {
 func testArrayOfTwoElementsSynchronouslyPublishesElementsInOrder() throws {
     let publisher = ["foo", "bar"].publisher
     let recorder = publisher.record()
-
+    
     var element = try recorder.next().get()
     XCTAssertEqual(element, "foo")
-
+    
     element = try recorder.next().get()
     XCTAssertEqual(element, "bar")
 }
@@ -546,10 +546,10 @@ Example:
 func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-
+    
     var elements = try wait(for: recorder.next(2), timeout: ...)
     XCTAssertEqual(elements, ["foo", "bar"])
-
+    
     elements = try wait(for: recorder.next(1), timeout: ...)
     XCTAssertEqual(elements, ["baz"])
 }
@@ -558,10 +558,10 @@ func testArrayOfThreeElementsPublishesTwoThenOneElement() throws {
 func testArrayOfThreeElementsSynchronouslyPublishesTwoThenOneElement() throws {
     let publisher = ["foo", "bar", "baz"].publisher
     let recorder = publisher.record()
-
+    
     var elements = try recorder.next(2).get()
     XCTAssertEqual(elements, ["foo", "bar"])
-
+    
     elements = try recorder.next(1).get()
     XCTAssertEqual(elements, ["baz"])
 }
