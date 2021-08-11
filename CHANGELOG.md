@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 #### 0.x Releases
 
+- [0.10.0](#0100)
 - [0.9.0](#090)
 - [0.8.0](#080)
 - [0.7.0](#070)
@@ -14,6 +15,12 @@ All notable changes to this project will be documented in this file.
 - [0.3.0](#030)
 - [0.2.0](#020)
 - [0.1.0](#010)
+
+## 0.10.0
+
+Released August 11, 2021 &bull; [diff](https://github.com/groue/CombineExpectations/compare/v0.9.0...v0.10.0)
+
+- **New**: [#17](https://github.com/groue/CombineExpectations/pull/17) by [@chris-araman](https://github.com/chris-araman): Improvements for Swift 5.1, Swift 5.3, Swift 5.4, watchOS 7.4, Xcode 12.5, Xcode 13 beta
 
 ## 0.9.0
 
