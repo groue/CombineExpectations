@@ -8,11 +8,11 @@ Pod::Spec.new do |s|
   s.author   = { 'Gwendal Roué' => 'gr@pierlis.com' }
   s.source   = { :git => 'https://github.com/groue/CombineExpectations.git', :tag => "v#{s.version}" }
   
-  s.swift_versions = ['5.2']
+  s.swift_versions = ['5.1', '5.2', '5.3', '5.4']
   s.ios.deployment_target = '13.0'
   s.osx.deployment_target = '10.15'
   s.tvos.deployment_target = '13.0'
-  s.watchos.deployment_target = '6.0'
+  s.watchos.deployment_target = '7.4'
   
   s.frameworks = ['Combine', 'XCTest']
   s.source_files = 'Sources/CombineExpectations/**/*.swift'

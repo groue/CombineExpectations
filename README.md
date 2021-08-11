@@ -6,7 +6,7 @@
 
 **Latest release**: [version 0.9.0](https://github.com/groue/CombineExpectations/tree/v0.9.0) (June 7, 2021) • [Release Notes]
 
-**Requirements**: iOS 13+, macOS 10.15+, and tvOS 13+ require Swift 5.2+ or Xcode 11.4+. watchOS 6+ requires Swift 5.4+ or Xcode 12.5+.
+**Requirements**: iOS 13+, macOS 10.15+, and tvOS 13+ require Swift 5.1+ or Xcode 11+. watchOS 7.4+ requires Swift 5.4+ or Xcode 12.5+.
 
 **Contact**: Report bugs and ask questions in [Github issues](https://github.com/groue/CombineExpectations/issues).
 
@@ -267,7 +267,7 @@ func testElementsTimeout() throws {
     let recorder = publisher.record()
     let elements = try wait(for: recorder.elements, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testElementsError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -318,7 +318,7 @@ func testFinishedTimeout() throws {
     let recorder = publisher.record()
     try wait(for: recorder.finished, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testFinishedError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -407,7 +407,7 @@ func testLastTimeout() throws {
     let recorder = publisher.record()
     let element = try wait(for: recorder.last, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testLastError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -645,7 +645,7 @@ func testPrefixTimeout() throws {
     publisher.send("foo")
     let elements = try wait(for: recorder.prefix(2), timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testPrefixError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -675,7 +675,7 @@ func testPassthroughSubjectPublishesNoMoreThanSentValues() throws {
 <details>
     <summary>Examples of failing tests</summary>
 
-```swift   
+```swift
 // FAIL: Fulfilled inverted expectation
 func testInvertedPrefixTooEarly() throws {
     let publisher = PassthroughSubject<String, Never>()
@@ -685,7 +685,7 @@ func testInvertedPrefixTooEarly() throws {
     publisher.send("baz")
     let elements = try wait(for: recorder.prefix(3).inverted, timeout: ...)
 }
-    
+
 // FAIL: Fulfilled inverted expectation
 // FAIL: Caught error MyError
 func testInvertedPrefixError() throws {
@@ -797,7 +797,7 @@ func testSingleTimeout() throws {
     let recorder = publisher.record()
     let element = try wait(for: recorder.single, timeout: ...)
 }
-    
+
 // FAIL: Caught error MyError
 func testSingleError() throws {
     let publisher = PassthroughSubject<String, MyError>()
@@ -805,7 +805,7 @@ func testSingleError() throws {
     publisher.send(completion: .failure(MyError()))
     let element = try wait(for: recorder.single, timeout: ...)
 }
-    
+
 // FAIL: Caught error RecordingError.tooManyElements
 func testSingleTooManyElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
@@ -815,7 +815,7 @@ func testSingleTooManyElementsError() throws {
     publisher.send(completion: .finished)
     let element = try wait(for: recorder.single, timeout: ...)
 }
-    
+
 // FAIL: Caught error RecordingError.notEnoughElements
 func testSingleNotEnoughElementsError() throws {
     let publisher = PassthroughSubject<String, Never>()
